@@ -6,16 +6,19 @@ use DevUri\Meta\Settings;
 // implement meta fields
 class Details extends Settings
 {
-	/**
-	 * the metabox settings
-	 */
+    /**
+     * the metabox settings
+     * @param $get_meta
+     */
 	public function settings( $get_meta ): void
 	{
 		echo self::form()->textarea( 'Description', self::meta( 'description', $get_meta ) );
 	}
 
-	/**
+    /**
      * the data
+     * @param $post_data
+     * @return array
      */
 	public function data( $post_data ): array
 	{
@@ -25,6 +28,9 @@ class Details extends Settings
 
 }
 
-// adds metabox to the "vehicle" post type.
-$details = new Details('vehicle');
-new MetaBox( $details );
+
+$details = new Details('vehicle'); // create metabox.
+
+new MetaBox( $details ); // adds metabox no stripes.
+
+new MetaBox( $details, true ); // adds metabox with zebra table.

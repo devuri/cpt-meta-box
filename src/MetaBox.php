@@ -3,14 +3,15 @@
 namespace DevUri\Meta;
 
 use Exception;
-use DevUri\Meta\Traits\Form;
 use ReflectionClass;
 use ReflectionException;
+use DevUri\Meta\Traits\StyleTrait;
+use DevUri\Meta\Traits\Form;
 
 class MetaBox
 {
 
-	use Form;
+	use Form, StyleTrait;
 
 	// data.
 	protected $data = [];
@@ -33,35 +34,55 @@ class MetaBox
 	public $settings;
 
     /**
+     * @var array
+     */
+    private $args;
+
+    /**
      * Setup
      *
      * @param Settings $settings
+     * @param bool $args
      */
-	public function __construct( Settings $settings ) {
+	public function __construct( Settings $settings, $args = true ) {
+
+		$this->args = $this->setArgs( $args );
 
 		$this->settings = $settings;
 		$this->post_type = sanitize_title( $settings->post_type );
 
 		// build the metabox.
-		add_action( 'add_meta_boxes', array( $this, 'create_metabox' ) );
-		add_action( 'save_post', array( $this, 'save_data') );
+		add_action( 'add_meta_boxes', [ $this, 'create_metabox' ] );
+		add_action( 'save_post', [ $this, 'save_data' ] );
 
 		// define meta name.
 		$this->meta = $this->meta_name();
 
 	}
 
+	/**
+	 * Set args.
+	 *
+	 * @return array .
+	 */
+	protected function setArgs( $args ): array
+	{
+		if ( ! is_array( $args ) ) {
+			$args = array( 'striped' => $args );
+		}
+		return $args;
+	}
+
     /**
      * Set Meta Name based on class name.
      *
      * @return string the class name.
-     * @throws ReflectionException
      */
 	protected function meta_name(): string
     {
 		try {
 			$class = new ReflectionClass( $this->settings );
-		} catch (\Exception $e) {
+		} catch (Exception $e) {
 			dump( $e );
 		}
 		return sanitize_title( $class->getShortName() );
@@ -113,6 +134,10 @@ class MetaBox
      * @param WP_Post $post Current post object.
      */
 	public function render_metabox( $post ) {
+
+		// table style.
+		$this->table_style( $this->args );
+
 		?>
 		<div id="post-meta-form" style="margin: -12px;">
 			<?php
