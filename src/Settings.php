@@ -4,12 +4,13 @@ namespace DevUri\Meta;
 
 use Exception;
 use DevUri\Meta\Contracts\SettingsInterface;
+use DevUri\Meta\Traits\MetaTrait;
 use DevUri\Meta\Traits\Form;
 
 abstract class Settings implements SettingsInterface
 {
 
-	use Form;
+	use MetaTrait, Form;
 
 	/**
 	 * Get the Post Types.
@@ -31,23 +32,6 @@ abstract class Settings implements SettingsInterface
 		}
 		$this->post_type = $post_type;
 
-	}
-
-	/**
-     * Use to get meta key.
-     *
-     * Solves Undefined index notice.
-     *
-     * @param string $key the meta key.
-     * @param array $get_meta the meta array.
-     * @return mixed
-     */
-	public static function meta( string $key, array $get_meta ): string
-    {
-		if ( isset( $get_meta[$key] ) ) {
-			return $get_meta[$key];
-		}
-		return '';
 	}
 
     /**
