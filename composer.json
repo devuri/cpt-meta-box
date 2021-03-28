@@ -1,7 +1,7 @@
 {
     "name": "devuri/cpt-meta-box",
     "type": "library",
-    "description": "Simple Implemetation for custom meta boxes and fields for WordPress custom post types.",
+    "description": "Simple Implementation for custom meta boxes and fields for WordPress custom post types.",
     "keywords": [
 		"wp",
 		"wordpress",
