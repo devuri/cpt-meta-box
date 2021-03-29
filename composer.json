@@ -31,7 +31,7 @@
     "require": {
 		"php": "^7.1",
 		"symfony/var-dumper": "^5.1.4",
-		"devuri/wp-admin-page": "^3.3"
+		"devuri/wp-admin-page": "^3.3.2"
     },
 	"require-dev": {
 		"phpunit/phpunit": "^8.0|^9.0"
