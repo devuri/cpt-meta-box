@@ -10,7 +10,6 @@ use DevUri\Meta\Traits\Form;
 
 class MetaBox
 {
-
 	use Form, StyleTrait;
 
 	// data.
@@ -133,9 +132,8 @@ class MetaBox
      *
      * @param WP_Post $post Current post object.
      */
-	public function render_metabox( $post ) {
-
-		// table style.
+	public function render_metabox( $post )
+	{
 		$this->table_style( $this->args );
 
 		?>
@@ -165,7 +163,6 @@ class MetaBox
 		   ?>
 	   </div>
 		<?php
-
 	}
 
     /**
@@ -177,7 +174,6 @@ class MetaBox
      */
 	public function save_data( int $post_id ): bool
     {
-
 		if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
 			return false;
 		}
@@ -206,7 +202,6 @@ class MetaBox
 		 */
 		update_post_meta( $post_id, $this->meta . '_meta', $this->data );
 		return true;
-
 	}
 
 }
