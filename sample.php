@@ -12,7 +12,11 @@ class Details extends Settings
      */
 	public function settings( $get_meta ): void
 	{
+		// regular textarea.
 		echo self::form()->textarea( 'Description', self::meta( 'description', $get_meta ) );
+
+		// editor uses a simplified version wp_editor.
+		echo self::editor( 'Description', self::meta( 'description', $get_meta ) );
 	}
 
     /**
@@ -28,8 +32,7 @@ class Details extends Settings
 
 }
 
-
-$details = new Details('vehicle'); // create metabox.
+$details = new Details( 'vehicle' ); // metabox uses class name as label.
 
 new MetaBox( $details ); // adds metabox no stripes.
 
