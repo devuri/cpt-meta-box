@@ -9,7 +9,6 @@ use DevUri\Meta\Traits\Form;
 
 abstract class Settings implements SettingsInterface
 {
-
 	use MetaTrait, Form;
 
 	/**
@@ -19,13 +18,20 @@ abstract class Settings implements SettingsInterface
 	 */
 	public $post_type;
 
+	/**
+	 * List of input fields.
+	 *
+	 * @var array .
+	 */
+	protected $fields = [];
+
     /**
      * Setup
      *
      * @param string|null $post_type .
      * @throws Exception
      */
-	public function __construct( string $post_type = null ) {
+	public function __construct( string $post_type ) {
 
 		if ( is_null( $post_type ) || empty( $post_type ) ) {
 			throw new Exception('Please check post type param: '.$post_type);
