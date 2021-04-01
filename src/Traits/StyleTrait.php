@@ -33,9 +33,11 @@ trait StyleTrait
 	}
 
 	/**
- 	* Table styles.
- 	*/
-    public function zebra_table() {
+	 * zebra table.
+	 *
+	 * @return void
+	 */
+    public function zebra_table(): void {
  	   ?><style media="all">
  		   #post-meta-form table {
  			   border-collapse: collapse;
