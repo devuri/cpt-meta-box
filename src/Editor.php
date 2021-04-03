@@ -22,7 +22,8 @@ class Editor {
      * @param $content
      * @return Editor
      */
-	public static function init( $id, $content ){
+	public static function init( $id, $content )
+	{
 		if ( ! isset( self::$instance ) ) {
 			self::$instance = new self( $id, $content);
 		}
