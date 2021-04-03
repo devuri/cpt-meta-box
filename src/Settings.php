@@ -31,13 +31,12 @@ abstract class Settings implements SettingsInterface
      * @param string|null $post_type .
      * @throws Exception
      */
-	public function __construct( string $post_type ) {
-
+	public function __construct( string $post_type )
+	{
 		if ( is_null( $post_type ) || empty( $post_type ) ) {
 			throw new Exception('Please check post type param: '.$post_type);
 		}
 		$this->post_type = $post_type;
-
 	}
 
     /**

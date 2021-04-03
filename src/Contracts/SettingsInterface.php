@@ -6,7 +6,6 @@ use WPAdminPage\FormHelper;
 
 interface SettingsInterface
 {
-
 	/**
 	 * Load the FormHelper class
 	 *

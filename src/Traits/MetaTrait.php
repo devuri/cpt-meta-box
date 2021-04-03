@@ -2,8 +2,8 @@
 
 namespace DevUri\Meta\Traits;
 
-trait MetaTrait {
-
+trait MetaTrait
+{
 	/**
 	 * Info for the current item.
 	 *
