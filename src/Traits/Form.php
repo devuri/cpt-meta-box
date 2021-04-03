@@ -3,9 +3,10 @@
 namespace DevUri\Meta\Traits;
 
 use WPAdminPage\FormHelper;
+use DevUri\Meta\Editor;
 
-trait Form {
-
+trait Form
+{
 	/**
 	 * Load the FormHelper class
 	 *
@@ -16,4 +17,14 @@ trait Form {
 		return new FormHelper();
 	}
 
+ 	/**
+ 	 * [editor description]
+ 	 * @param string $id the id like 'text_editor'.
+ 	 * @param string $content .
+ 	 * @return Editor
+ 	 */
+    public function editor( $id, $content )
+	{
+		return Editor::init( $id, $content )->get();
+    }
 }

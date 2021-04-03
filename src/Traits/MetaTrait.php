@@ -2,8 +2,8 @@
 
 namespace DevUri\Meta\Traits;
 
-trait MetaTrait {
-
+trait MetaTrait
+{
 	/**
 	 * Info for the current item.
 	 *
@@ -14,8 +14,6 @@ trait MetaTrait {
 	 */
 	public static function info( $th = null, $text = null, $hr = false ): string
     {
-
-		// set hr separate
 		$border = $hr ? 'border-bottom: solid thin #ccd0d4;' : '';
 
 		return sprintf(
@@ -75,7 +73,8 @@ trait MetaTrait {
      * @param $price
      * @return mixed
      */
-	public static function sanitize_price( $price ) {
+	public static function sanitize_price( $price ): int
+	{
 		$price = sanitize_title( $price );
 		$price = str_replace("-", "", $price);
 		return absint($price);
@@ -88,7 +87,8 @@ trait MetaTrait {
      * @param  string $input_field input name
      * @return string
      */
-    public static function input_val( $input_field = null ){
+    public static function input_val( $input_field = null )
+	{
       	$input = sanitize_text_field( $input_field );
       	if ( isset( $input )) {
         	return $input;
@@ -102,13 +102,13 @@ trait MetaTrait {
      * Solves Undefined index notice.
      *
      * @param string $key the meta key.
-     * @param array $get_meta the meta array.
+     * @param array $meta the meta array.
      * @return mixed
      */
-	public static function meta( string $key, array $get_meta ): string
+	public static function meta( string $key, array $meta ): string
     {
-		if ( isset( $get_meta[$key] ) ) {
-			return $get_meta[$key];
+		if ( isset( $meta[$key] ) ) {
+			return $meta[$key];
 		}
 		return '';
 	}
