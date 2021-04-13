@@ -4,7 +4,6 @@ namespace DevUri\Meta;
 
 use Exception;
 use ReflectionClass;
-use ReflectionException;
 use DevUri\Meta\Traits\StyleTrait;
 use DevUri\Meta\Traits\Form;
 

@@ -63,8 +63,7 @@ trait MetaTrait
     {
 		$list = wp_strip_all_tags( $list );
 		$list = preg_replace('/[^0-9,]/', '', $list);
-		$list = explode (",", $list);
-		return $list;
+        return explode (",", $list);
 	}
 
     /**
