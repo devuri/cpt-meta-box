@@ -81,7 +81,7 @@ class MetaBox
 		try {
 			$class = new ReflectionClass( $this->settings );
 		} catch (Exception $e) {
-			dump( $e );
+			print( $e );
 		}
 		return sanitize_title( $class->getShortName() );
 	}
@@ -154,7 +154,7 @@ class MetaBox
 				try {
 					$this->build()->settings( $get_meta );
 				} catch ( Exception $e ) {
-					dump('Exception Message: ' .$e->getMessage());
+					print('Exception Message: ' .$e->getMessage());
 				}
 
 				echo self::form()->table('close');
