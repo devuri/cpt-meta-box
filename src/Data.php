@@ -100,12 +100,20 @@ class Data
      * Retrieves a post meta field for the given post ID.
      *
      * @param $ID
+     * @param $name the meta name to retreive.
      * @return array .
      * @link https://developer.wordpress.org/reference/functions/get_post_meta/
      */
-	public function meta( $ID )
+	public function meta( $ID, $name = null )
     {
-        return get_post_meta( $ID, $this->post_type . '_meta', true );
+		if ( is_null( $name ) ) {
+			$name = $this->post_type . '_meta';
+		}
+        $meta_data = get_post_meta( $ID, $name, true );
+		$meta_data['thumbnail'] = get_post_thumbnail_id( $ID );
+		$meta_data['ID'] = $ID;
+
+        return $meta_data;
 	}
 
 	/**
