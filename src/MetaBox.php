@@ -193,6 +193,15 @@ class MetaBox
 		$this->data = $this->build()->data( $_POST );
 
 		/**
+		 * Filters the post meta data before save.
+		 *
+		 * @param string $this->meta.'_meta' meta name example 'movie_meta'.
+		 * @param array $this->data the data being saved.
+		 * @param int $post_id The post ID.
+		 */
+		apply_filters( $this->meta.'_meta', $this->data, $post_id );
+
+		/**
 		 * Updates the post meta field.
 		 *
 		 * $data is saved as a single array of key val pairs.
