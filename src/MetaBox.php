@@ -206,6 +206,15 @@ class MetaBox
         apply_filters($this->meta.'_meta', $this->data, $post_id);
 
         /**
+         * Before meta update.
+         *
+         * @param array $this->data the data being saved.
+         * @param int $post_id The post ID.
+         * @param object $post The global $post object.
+         */
+        do_action('cptm_before_meta_update', $this->data, $post_id, $post);
+
+        /**
          * Updates the post meta field.
          *
          * $data is saved as a single array of key val pairs.
@@ -213,6 +222,16 @@ class MetaBox
          * @var
          */
         update_post_meta($post_id, $this->meta . '_meta', $this->data);
+
+        /**
+         * After meta update.
+         *
+         * @param array $this->data the data being saved.
+         * @param int $post_id The post ID.
+         * @param object $post The global $post object.
+         */
+        do_action('cptm_after_meta_update', $this->data, $post_id, $post);
+
         return true;
     }
 }
