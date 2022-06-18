@@ -78,6 +78,7 @@ class MetaBox
      */
 	protected function meta_name(): string
     {
+		$class = null;
 		try {
 			$class = new ReflectionClass( $this->settings );
 		} catch (Exception $e) {
@@ -198,6 +199,7 @@ class MetaBox
 		 * @param string $this->meta.'_meta' meta name example 'movie_meta'.
 		 * @param array $this->data the data being saved.
 		 * @param int $post_id The post ID.
+		 * @phpstan-ignore-next-line
 		 */
 		apply_filters( $this->meta.'_meta', $this->data, $post_id );
 

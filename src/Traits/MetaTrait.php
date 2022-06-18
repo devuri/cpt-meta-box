@@ -89,7 +89,7 @@ trait MetaTrait
     public static function input_val( $input_field = null )
 	{
       	$input = sanitize_text_field( $input_field );
-      	if ( isset( $input )) {
+      	if (! empty( $input )) {
         	return $input;
       	}
 		return false;
