@@ -8,19 +8,21 @@ trait StyleTrait
      * Table styles.
      * @param $args
      */
-	public function table_style( $args ) {
-		if ( $args['striped'] ) {
-			$this->zebra_table();
-			return;
-		}
-		$this->table_css();
-	}
+    public function table_style($args)
+    {
+        if ($args['striped']) {
+            $this->zebra_table();
+            return;
+        }
+        $this->table_css();
+    }
 
-	/**
+    /**
      * Table styles.
      */
-	public function table_css() {
-		?><style media="all">
+    public function table_css()
+    {
+        ?><style media="all">
 			#post-meta-form table {
 				border-collapse: collapse;
 				width: 100%;
@@ -30,15 +32,16 @@ trait StyleTrait
 				padding: 12px;
 			}
 		</style><?php
-	}
+    }
 
-	/**
-	 * zebra table.
-	 *
-	 * @return void
-	 */
-    public function zebra_table(): void {
- 	   ?><style media="all">
+    /**
+     * zebra table.
+     *
+     * @return void
+     */
+    public function zebra_table(): void
+    {
+        ?><style media="all">
  		   #post-meta-form table {
  			   border-collapse: collapse;
  			   width: 100%;
@@ -56,5 +59,4 @@ trait StyleTrait
  		   }
  	   </style><?php
     }
-
 }

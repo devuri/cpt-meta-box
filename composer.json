@@ -50,7 +50,7 @@
 		"build": [
 			"composer phplint",
 			"composer phpstan",
-			"composer php-cs-fixer",
+			"composer codefix",
 			"composer no-dev -q",
 			"composer no-dev"
 		],
@@ -62,8 +62,8 @@
 			"composer install -q",
 			"vendor/bin/parallel-lint --colors --exclude app --exclude vendor ."
 		],
-		"php-cs-fixer": [
-		    "composer install",
+		"codefix": [
+		    "composer install -q",
 		    "vendor/bin/php-cs-fixer fix src"
 		],
         "no-dev": "composer install --no-dev -q"
