@@ -15,6 +15,8 @@ class MetaBox
     // data.
     protected $data = [];
 
+	protected $meta_id;
+
     // meta name.
     protected $meta;
 
@@ -37,6 +39,11 @@ class MetaBox
      */
     private $args;
 
+	/**
+	 * @var string
+	 */
+	private $field;
+
     /**
      * Setup
      *
@@ -49,12 +56,15 @@ class MetaBox
         $this->settings  = $settings;
         $this->post_type = sanitize_title($settings->post_type);
 
-        // build the metabox.
-        add_action('add_meta_boxes', [ $this, 'create_metabox' ]);
-        add_action('save_post', [ $this, 'save_data' ]);
-
         // define meta name.
-        $this->meta = $this->meta_name();
+		$this->meta = $this->get_class_name();
+		$this->group_key = '_'. hash('fnv1a32', $this->meta);
+		$this->meta_id = 'cpm-group-' . $this->meta . $this->group_key;
+		$this->meta_field = $this->meta . '_cpm';
+
+		// build the metabox.
+		add_action('add_meta_boxes', [ $this, 'create_metabox' ]);
+		add_action('save_post', [ $this, 'save_data' ]);
     }
 
     /**
@@ -65,9 +75,16 @@ class MetaBox
     protected function setArgs($args): array
     {
         if (! is_array($args)) {
-            $args = [ 'striped' => $args ];
-        }
-        return $args;
+            return [ 'striped' => true ];
+        } elseif ( is_array($args) ){
+			return array_merge(
+				[
+					'striped' => true,
+				],
+				$args
+			);
+		}
+		return [];
     }
 
     /**
@@ -75,7 +92,7 @@ class MetaBox
      *
      * @return string the class name.
      */
-    protected function meta_name(): string
+    protected function get_class_name(): string
     {
         $class = null;
         try {
@@ -115,13 +132,12 @@ class MetaBox
      */
     public function create_metabox()
     {
-        $meta_id    = $this->meta . '-meta-box';
         $meta_label = ucfirst($this->meta);
 
         add_meta_box(
-            $meta_id,
+            $this->meta_id,
             __($meta_label . ' ', 'brisko'),
-            [ $this, 'render_metabox' ],
+            [ $this, 'render' ],
             $this->post_type
         );
     }
@@ -131,9 +147,9 @@ class MetaBox
      *
      * @param WP_Post $post Current post object.
      */
-    public function render_metabox($post)
+    public function render($post)
     {
-        $this->table_style($this->args); ?>
+        $this->table_style($this->args['striped']); ?>
 		<div id="post-meta-form" style="margin: -12px;">
 			<?php
                 echo self::form()->table('open');
@@ -141,7 +157,7 @@ class MetaBox
         /**
          * Get meta data.
          */
-        $get_meta = get_post_meta($post->ID, $this->meta . '_meta', true);
+        $get_meta = get_post_meta($post->ID, $this->meta_field, true);
         if (empty($get_meta)) {
             $get_meta = [];
         }
@@ -151,6 +167,7 @@ class MetaBox
          */
         try {
             $this->build()->settings($get_meta);
+			//echo self::show_field_id( $this->meta_field );
         } catch (Exception $e) {
             print('Exception Message: ' .$e->getMessage());
         }
@@ -160,6 +177,11 @@ class MetaBox
 	   </div>
 		<?php
     }
+
+	protected static function show_field_id( string $field )
+	{
+		return wp_kses_post('<th style="color: darkgrey; font-weight: normal;"><small> '.$field.'</small></th>');
+	}
 
     /**
      * Save Data.
@@ -198,12 +220,12 @@ class MetaBox
         /**
          * Filters the post meta data before save.
          *
-         * @param string $this->meta.'_meta' meta name example 'movie_meta'.
+         * @param string $this->meta_field meta name example 'movie_cpm'.
          * @param array $this->data the data being saved.
          * @param int $post_id The post ID.
          * @phpstan-ignore-next-line
          */
-        apply_filters($this->meta.'_meta', $this->data, $post_id);
+        apply_filters($this->meta_field, $this->data, $post_id);
 
         /**
          * Before meta update.
@@ -221,7 +243,7 @@ class MetaBox
          * example movies_meta[]
          * @var
          */
-        update_post_meta($post_id, $this->meta . '_meta', $this->data);
+        update_post_meta($post_id, $this->meta_field, $this->data);
 
         /**
          * After meta update.
