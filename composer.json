@@ -29,10 +29,11 @@
         "issues": "https://github.com/devuri/cpt-meta-box/issues"
     },
     "require": {
-		"php": "^7.1",
+		"php": "^7.1 || ^8.1",
 		"devuri/wp-admin-page": "^3.3.2"
     },
 	"require-dev": {
+		"10up/phpcs-composer": "dev-master",
 		"symfony/var-dumper": "^5.1.4",
 		"phpunit/phpunit": "^8.0|^9.0",
 		"vimeo/psalm": "^4.8",
@@ -66,11 +67,18 @@
 		    "composer install -q",
 		    "vendor/bin/php-cs-fixer fix src"
 		],
+		"wpcs-fix": [
+			"composer install -q",
+			"phpcbf src"
+		],
         "no-dev": "composer install --no-dev -q"
     },
-    "config": {
-		"preferred-install": "dist",
-        "sort-packages": true,
-		"optimize-autoloader": true
-  	}
+	"config": {
+	    "allow-plugins": {
+	        "dealerdirect/phpcodesniffer-composer-installer": true
+	    },
+	    "optimize-autoloader": true,
+	    "preferred-install": "dist",
+	    "sort-packages": true
+	}
 }

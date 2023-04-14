@@ -8,7 +8,7 @@ use WPAdminPage\FormHelper;
 trait Form
 {
     /**
-     * Load the FormHelper class
+     * Load the FormHelper class.
      *
      * @return FormHelper
      */
@@ -18,13 +18,15 @@ trait Form
     }
 
     /**
-     * [editor description]
-     * @param string $id the id like 'text_editor'.
+     * [editor description].
+     *
+     * @param string $id      the id like 'text_editor'.
      * @param string $content .
+     *
      * @return Editor
      */
-    public function editor($id, $content)
+    public function editor( $id, $content )
     {
-        return Editor::init($id, $content)->get();
+        return Editor::init( $id, $content )->get();
     }
 }
