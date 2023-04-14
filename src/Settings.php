@@ -9,8 +9,8 @@ use Exception;
 
 abstract class Settings implements SettingsInterface
 {
-    use MetaTrait;
     use Form;
+    use MetaTrait;
 
     /**
      * Get the Post Types.
@@ -27,28 +27,41 @@ abstract class Settings implements SettingsInterface
     protected $fields = [];
 
     /**
-     * Setup
+     * Setup.
      *
-     * @param string|null $post_type .
+     * @param null|string $post_type .
+     *
      * @throws Exception
      */
-    public function __construct(string $post_type)
+    public function __construct( string $post_type )
     {
-        if (is_null($post_type) || empty($post_type)) {
-            throw new Exception('Please check post type param: '.$post_type);
+        if ( \is_null( $post_type ) || empty( $post_type ) ) {
+            throw new Exception( 'Please check post type param: ' . $post_type );
         }
         $this->post_type = $post_type;
     }
 
     /**
-     * Lets build out the metabox settings
+     * Lets build out the metabox settings.
+     *
      * @param $get_meta
      */
-    abstract public function settings($get_meta);
+    abstract public function settings( $get_meta );
 
     /**
-     * Lets get the build data.
-     * @param $post_data
+     * Lets build out the data settings.
+     *
+     * @param array $post_data $_POST variable items should be cleaned.
+     *
+     * @return array
      */
-    abstract public function data($post_data);
+    public function data( $post_data ): array
+    {
+        if ( $this->auto_save ) {
+            // TODO only process field in $this->field items.
+            return array_map( 'sanitize_text_field', $post_data );
+        }
+
+        return [];
+    }
 }

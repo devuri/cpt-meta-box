@@ -7,12 +7,13 @@ trait MetaTrait
     /**
      * Info for the current item.
      *
-     * @param  string  $th   heading
-     * @param  string  $text the text description.
-     * @param  bool $hr   whether to add bottom border.
+     * @param string $th   heading
+     * @param string $text the text description.
+     * @param bool   $hr   whether to add bottom border.
+     *
      * @return string table row.
      */
-    public static function info($th = null, $text = null, $hr = false): string
+    public static function info( $th = null, $text = null, $hr = false ): string
     {
         $border = $hr ? 'border-bottom: solid thin #ccd0d4;' : '';
 
@@ -35,11 +36,12 @@ trait MetaTrait
     public static function the_id()
     {
         global $post;
-        if (! isset($post->ID)) {
+        if ( ! isset( $post->ID ) ) {
             return;
         }
-        $id = '<input type="text" value="'.$post->ID.'" disabled>';
-        return self::info('ID', $id);
+        $id = '<input type="text" value="' . $post->ID . '" disabled>';
+
+        return self::info( 'ID', $id );
     }
 
     /**
@@ -50,15 +52,16 @@ trait MetaTrait
     public static function thumbnail()
     {
         global $post;
-        if (! isset($post->ID)) {
+        if ( ! isset( $post->ID ) ) {
             return;
         }
-        if (! has_post_thumbnail($post->ID)) {
+        if ( ! has_post_thumbnail( $post->ID ) ) {
             return;
         }
-        $id    = get_post_meta($post->ID, '_thumbnail_id', true);
-        $image = '<img width="400" src="' . wp_get_attachment_url($id) . '" loading="lazy">';
-        return self::info('', $image, true);
+        $id    = get_post_meta( $post->ID, '_thumbnail_id', true );
+        $image = '<img width="400" src="' . wp_get_attachment_url( $id ) . '" loading="lazy">';
+
+        return self::info( '', $image, true );
     }
 
     /**
@@ -68,39 +71,45 @@ trait MetaTrait
      *
      * @return array $list.
      */
-    public static function sanitize_intlist($list): array
+    public static function sanitize_intlist( $list ): array
     {
-        $list = wp_strip_all_tags($list);
-        $list = preg_replace('/[^0-9,]/', '', $list);
-        return explode(",", $list);
+        $list = wp_strip_all_tags( $list );
+        $list = preg_replace( '/[^0-9,]/', '', $list );
+
+        return explode( ',', $list );
     }
 
     /**
-     * Clean Price
+     * Clean Price.
      *
      * @param $price
+     *
      * @return mixed
      */
-    public static function sanitize_price($price): int
+    public static function sanitize_price( $price ): int
     {
-        $price = sanitize_title($price);
-        $price = str_replace("-", "", $price);
-        return absint($price);
+        $price = sanitize_title( $price );
+        $price = str_replace( '-', '', $price );
+
+        return absint( $price );
     }
 
     /**
-     * input_val
+     * input_val.
      *
      * Get the input field $_POST data
-     * @param  string $input_field input name
+     *
+     * @param string $input_field input name
+     *
      * @return string
      */
-    public static function input_val($input_field = null)
+    public static function input_val( $input_field = null )
     {
-        $input = sanitize_text_field($input_field);
-        if (! empty($input)) {
+        $input = sanitize_text_field( $input_field );
+        if ( ! empty( $input ) ) {
             return $input;
         }
+
         return false;
     }
 
@@ -109,15 +118,17 @@ trait MetaTrait
      *
      * Solves Undefined index notice.
      *
-     * @param string $key the meta key.
-     * @param array $meta the meta array.
+     * @param string $key  the meta key.
+     * @param array  $meta the meta array.
+     *
      * @return mixed
      */
-    public static function meta(string $key, array $meta): string
+    public static function meta( string $key, array $meta ): string
     {
-        if (isset($meta[$key])) {
-            return $meta[$key];
+        if ( isset( $meta[ $key ] ) ) {
+            return $meta[ $key ];
         }
+
         return '';
     }
 }
