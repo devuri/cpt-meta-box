@@ -45,9 +45,7 @@ Here's how you can use this package to create a Meta Box and a Meta Field:
         {
             return [
                 "title" => sanitize_textarea_field($post_data["title"]),
-                "description" => sanitize_textarea_field(
-                    $post_data["description_textarea"]
-                ),
+                "description" => sanitize_textarea_field($post_data["description_textarea"]),
             ];
         }
     }
