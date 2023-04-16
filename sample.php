@@ -12,6 +12,9 @@ class Details extends Settings
      */
 	public function settings( $get_meta ): void
 	{
+		// basic input field
+		echo self::form()->input( 'Title', self::meta( 'title', $get_meta ) );
+
 		// regular textarea.
 		echo self::form()->textarea( 'Description', self::meta( 'description', $get_meta ) );
 
@@ -26,14 +29,40 @@ class Details extends Settings
      */
 	public function data( $post_data ): array
 	{
-		$data['description'] = sanitize_textarea_field( $post_data['description_textarea'] );
-		return $data;
+		return [
+			'title' => sanitize_textarea_field( $post_data['title'] ),
+			'description' => sanitize_textarea_field( $post_data['description_textarea'] ),
+		];
 	}
 
 }
 
-$details = new Details( 'vehicle' ); // metabox uses class name as label.
+// For `vehicle` post type. metabox uses class name `Details` as label.
+$details = new Details( 'vehicle' );
 
-new MetaBox( $details ); // adds metabox no stripes.
+// adds metabox no stripes.
+new MetaBox( $details );
 
-new MetaBox( $details, true ); // adds metabox with zebra table.
+ // adds metabox with zebra table.
+new MetaBox( $details, true );
+
+// set metabox name `Vehicle Details` as label.
+new MetaBox( $details, ['name' => 'Vehicle Details'] );
+
+// set metabox name `Vehicle Details` as label and zebra stripes
+new MetaBox( $details,
+	[
+		'name' => 'Vehicle Details',
+		'zebra' => true,
+	]
+);
+
+// zebra styles are applied by default, this will also use zebra style.
+new MetaBox( $details,
+	[
+		'name' => 'Vehicle Details',
+	]
+);
+
+// or
+new MetaBox( new Details( 'vehicle' ) );
