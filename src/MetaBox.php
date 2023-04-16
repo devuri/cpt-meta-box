@@ -15,10 +15,13 @@ class MetaBox
     protected $post_type;
     protected $settings;
     protected $data = [];
-	protected $meta;
+    protected $metabox;
     protected $meta_id;
     protected $args;
     protected $fields;
+    protected $meta_label;
+    protected $meta_field;
+    protected $group_key;
 
     /**
      * Setup.
@@ -28,19 +31,20 @@ class MetaBox
      */
     public function __construct( Settings $settings, $args = true )
     {
-        $this->args      = $this->setArgs( $args );
+        $this->args      = $this->set_args( $args );
         $this->settings  = $settings;
         $this->post_type = sanitize_title( $settings->post_type );
 
         // define meta name.
-        $this->meta       = $this->get_class_name();
-        $this->group_key  = '_' . hash( 'fnv1a32', $this->meta );
-        $this->meta_id    = 'cpm-group-' . $this->meta . $this->group_key;
-        $this->meta_field = $this->meta . '_cpm';
+        $this->metabox    = $this->set_name( $this->args );
+        $this->group_key  = '_' . hash( 'fnv1a32', $this->metabox );
+        $this->meta_id    = 'cpm-group-' . $this->metabox . $this->group_key;
+        $this->meta_field = $this->metabox . '_cpm';
+        $this->meta_label = ucfirst( str_replace( '-', ' ', $this->metabox ) );
 
-        // build the metabox.
-        add_action( 'add_meta_boxes', [ $this, 'create_metabox' ] );
-        add_action( 'save_post', [ $this, 'save_data' ] );
+        // build the meta box.
+        add_action( 'add_meta_boxes', [ $this, 'create_meta_box' ] );
+        add_action( 'save_post', [ $this, 'save_meta_data' ] );
     }
 
     /**
@@ -70,13 +74,11 @@ class MetaBox
      *
      * @see https://developer.wordpress.org/reference/functions/add_meta_box/
      */
-    public function create_metabox(): void
+    public function create_meta_box(): void
     {
-        $meta_label = ucfirst( $this->meta );
-
         add_meta_box(
             $this->meta_id,
-            __( $meta_label . ' ', 'brisko' ),
+            $this->meta_label,
             [ $this, 'render' ],
             $this->post_type
         );
@@ -90,7 +92,7 @@ class MetaBox
     public function render( $post ): void
     {
         $this->table_style( $this->args['striped'] ); ?>
-		<div id="post-meta-form" style="margin: -12px;">
+		<div id="cpm-post-meta-form" style="margin: -12px;">
 			<?php
                 echo self::form()->table( 'open' );
 
@@ -116,22 +118,6 @@ class MetaBox
 		<?php
     }
 
-	/**
-	 * Get the meta data.
-	 *
-	 * @return array
-	 */
-	protected function get_meta_data( $post_id ): array
-	{
-		$_meta = get_post_meta( $post_id, $this->meta_field, true );
-
-		if ( empty( $_meta ) ) {
-			return [];
-		}
-
-		return $_meta;
-	}
-
     /**
      * Save Data.
      *
@@ -139,7 +125,7 @@ class MetaBox
      *
      * @return bool
      */
-    public function save_data( int $post_id ): bool
+    public function save_meta_data( int $post_id ): bool
     {
         if ( \defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
             return false;
@@ -184,7 +170,7 @@ class MetaBox
          * @param int    $post_id    The post ID.
          * @param object $post       The global $post object.
          */
-        do_action( 'cptm_before_meta_update', $this->data, $post_id, $post );
+        do_action( 'cpm_before_meta_update', $this->data, $post_id, $post );
 
         /**
          * Updates the post meta field.
@@ -203,9 +189,41 @@ class MetaBox
          * @param int    $post_id    The post ID.
          * @param object $post       The global $post object.
          */
-        do_action( 'cptm_after_meta_update', $this->data, $post_id, $post );
+        do_action( 'cpm_after_meta_update', $this->data, $post_id, $post );
 
         return true;
+    }
+
+    /**
+     * Set the meta box group name.
+     *
+     * @param array $args
+     *
+     * @return string
+     */
+    protected function set_name( array $args ): string
+    {
+        $label = $args['name'] ?? $this->get_class_name();
+
+        return sanitize_title( $label );
+    }
+
+    /**
+     * Get the meta data.
+     *
+     * @param mixed $post_id
+     *
+     * @return array
+     */
+    protected function get_meta_data( $post_id ): array
+    {
+        $_meta = get_post_meta( $post_id, $this->meta_field, true );
+
+        if ( empty( $_meta ) ) {
+            return [];
+        }
+
+        return $_meta;
     }
 
     /**
@@ -215,15 +233,15 @@ class MetaBox
      *
      * @return array .
      */
-    protected function setArgs( $args ): array
+    protected function set_args( $args ): array
     {
         if ( ! \is_array( $args ) ) {
-            return [ 'striped' => true ];
+            return [ 'zebra' => true ];
         }
         if ( \is_array( $args ) ) {
             return array_merge(
                 [
-                    'striped' => true,
+                    'zebra' => true,
                 ],
                 $args
             );
@@ -233,11 +251,23 @@ class MetaBox
     }
 
     /**
+     * Show field ID.
+     *
+     * @param string $field
+     *
+     * @return string
+     */
+    protected static function show_field_id( string $field ): string
+    {
+        return wp_kses_post( '<th style="color: darkgrey; font-weight: normal;"><small> ' . $field . '</small></th>' );
+    }
+
+    /**
      * Set Meta Name based on class name.
      *
      * @return string the class name.
      */
-    protected function get_class_name(): string
+    private function get_class_name(): string
     {
         $class = null;
 
@@ -247,11 +277,6 @@ class MetaBox
             print $e;
         }
 
-        return sanitize_title( $class->getShortName() );
-    }
-
-    protected static function show_field_id( string $field )
-    {
-        return wp_kses_post( '<th style="color: darkgrey; font-weight: normal;"><small> ' . $field . '</small></th>' );
+        return $class->getShortName();
     }
 }
