@@ -9,7 +9,7 @@ To install this package, run the following command in your terminal:
 ```shell
 composer require devuri/cpt-meta-box
 ```
-Usage  
+### Usage  
 Here's how you can use this package to create a Meta Box and a Meta Field:
 ```php
     use DevUri\Meta\MetaBox;
@@ -55,6 +55,7 @@ Here's how you can use this package to create a Meta Box and a Meta Field:
 ```
 This is all we need to setup a few fields.
 
+### Implement
 Then when ready we can implement the Meta Box for specific post type, in this example we are setting up a metabox called `Details` for the `vehicle` post type
 ```php
     // For `vehicle` post type. metabox uses class name `Details` as label.
