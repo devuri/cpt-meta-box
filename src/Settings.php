@@ -24,7 +24,7 @@ abstract class Settings implements SettingsInterface
      *
      * @var array .
      */
-    protected $fields = [];
+    protected $fields = null;
 
     /**
      * Setup.
@@ -57,8 +57,8 @@ abstract class Settings implements SettingsInterface
      */
     public function data( $post_data ): array
     {
-        if ( $this->auto_save ) {
-            // TODO only process field in $this->field items.
+        if ( $this->fields ) {
+            // TODO only process field in $this->fields items.
             return array_map( 'sanitize_text_field', $post_data );
         }
 
