@@ -9,9 +9,9 @@ trait StyleTrait
      *
      * @param $args
      */
-    public function table_style( bool $striped ): void
+    public function table_style( bool $zebra ): void
     {
-        if ( $striped ) {
+        if ( $zebra ) {
             $this->zebra_table();
 
             return;
