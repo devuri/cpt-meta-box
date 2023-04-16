@@ -12,7 +12,6 @@ composer require devuri/cpt-meta-box
 ### Usage  
 Here's how you can use this package to create a Meta Box and a Meta Field:
 ```php
-    use DevUri\Meta\MetaBox;
     use DevUri\Meta\Settings;
     
     // implement meta fields
