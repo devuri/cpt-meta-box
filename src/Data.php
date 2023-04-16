@@ -81,7 +81,7 @@ class Data
     }
 
     /**
-     * Get array key if it it set or return null.
+     * Get array key if it set or return null.
      *
      * @param $key
      * @param $data
