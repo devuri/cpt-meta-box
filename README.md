@@ -41,16 +41,15 @@ The `Settings` abstract class provides a foundation for defining and handling se
 
 To use the `Settings` class, follow these steps:
 
-1. Include the code in your WordPress project.
-2. Create a subclass that extends the `Settings` class.
-3. Implement the `settings()` method to define the meta box settings.
-4. Implement the `data()` method to handle the data submitted from the meta box fields.
-5. Customize the `Settings` subclass by adding fields and defining their settings within the `settings()` method.
-6. Instantiate the `Settings` subclass and pass it to the `MetaBox` class constructor to create and display the meta box.
+1. Create a subclass that extends the `Settings` class.
+2. Implement the `settings()` method to define the meta box settings.
+3. Implement the `data()` method to handle the data submitted from the meta box fields (be sure to sanitize).
+4. Customize the `Settings` subclass by adding fields and defining their settings within the `settings()` method.
+5. Instantiate the `Settings` subclass and pass it to the `MetaBox` class constructor to create and display the meta box.
 
 ## Example Usage
 
-The following example demonstrates the usage of the `MetaBox` and `Settings` classes based on the provided code snippet:
+The following example demonstrates the usage of the `MetaBox` and `Settings` classes:
 
 ```php
 use DevUri\Meta\MetaBox;
