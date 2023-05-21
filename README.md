@@ -88,9 +88,7 @@ $details = new Details('vehicle');
 new MetaBox($details);
 
 // Create a meta box with zebra table
-new
-
- MetaBox($details, true);
+new MetaBox($details, true);
 
 // Create a meta box with a custom label 'Vehicle Details'
 new MetaBox($details, ['name' => 'Vehicle Details']);
