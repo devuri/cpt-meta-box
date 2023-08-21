@@ -10,19 +10,19 @@ class Details extends Settings
      * the metabox settings
      * @param $get_meta
      */
-    public function settings($get_meta): void
+    public function settings(): void
     {
         // basic input field
-        echo self::form()->input("Title", self::meta("title", $get_meta));
+        echo self::form()->input("Title", $this->get_meta("title"));
 
         // regular textarea.
         echo self::form()->textarea(
             "Description",
-            self::meta("description", $get_meta)
+            $this->get_meta("description")
         );
 
         // editor uses a simplified version wp_editor.
-        echo self::editor("Description", self::meta("description", $get_meta));
+        echo self::editor("Description", $this->get_meta("description"));
     }
 
     /**

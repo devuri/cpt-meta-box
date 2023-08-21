@@ -6,6 +6,7 @@ use DevUri\Meta\Traits\Form;
 use DevUri\Meta\Traits\StyleTrait;
 use Exception;
 use ReflectionClass;
+use DevUri\Meta\Contracts\SettingsInterface;
 
 class MetaBox
 {
@@ -50,11 +51,11 @@ class MetaBox
     /**
      * Metabox build.
      *
-     * @return Settings settings
+     * @return SettingsInterface settings
      */
-    public function build(): Settings
+    public function build( $post_object = null ): SettingsInterface
     {
-        return $this->settings;
+        return $this->settings->create( $post_object, $this->meta_field );
     }
 
     /**
@@ -89,23 +90,19 @@ class MetaBox
      *
      * @param WP_Post $post Current post object.
      */
-    public function render( $post ): void
+    public function render( $post_object ): void
     {
-        $this->table_style( $this->args['striped'] ); ?>
+        $this->table_style( $this->args['zebra'] ); ?>
 		<div id="cpm-post-meta-form" style="margin: -12px;">
 			<?php
-                echo self::form()->table( 'open' );
 
-			/**
-			 * Get meta data.
-			 */
-			$get_meta = $this->get_meta_data( $post->ID );
+			echo self::form()->table( 'open' );
 
 			/**
 			 * Settings.
 			 */
 			try {
-				$this->build()->settings( $get_meta );
+				$this->build( $post_object )->settings();
 				// echo self::show_field_id( $this->meta_field );
 			} catch ( Exception $e ) {
 				print 'Exception: ' . $e->getMessage();
@@ -150,7 +147,7 @@ class MetaBox
         }
 
         // data to save.
-        $this->data = $this->build()->data( $_POST );
+        $this->data = $this->settings->data( $_POST );
 
         /**
          * Filters the post meta data before save.
@@ -206,24 +203,6 @@ class MetaBox
         $label = $args['name'] ?? $this->get_class_name();
 
         return sanitize_title( $label );
-    }
-
-    /**
-     * Get the meta data.
-     *
-     * @param mixed $post_id
-     *
-     * @return array
-     */
-    protected function get_meta_data( $post_id ): array
-    {
-        $_meta = get_post_meta( $post_id, $this->meta_field, true );
-
-        if ( empty( $_meta ) ) {
-            return [];
-        }
-
-        return $_meta;
     }
 
     /**
