@@ -15,10 +15,8 @@ interface SettingsInterface
 
     /**
      * Meta settings.
-     *
-     * @param $get_meta
      */
-    public function settings( $get_meta );
+    public function settings();
 
     /**
      * Settings data.
