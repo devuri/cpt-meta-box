@@ -25,11 +25,11 @@ trait StyleTrait
     public function table_css(): void
     {
         ?><style media="all">
-			#post-meta-form table {
+			#cpm-post-meta-form table {
 				border-collapse: collapse;
 				width: 100%;
 			}
-			#post-meta-form th, td {
+			#cpm-post-meta-form th, td {
 				text-align: left;
 				padding: 12px;
 			}
@@ -46,18 +46,18 @@ trait StyleTrait
     {
         ?>
         <style media="all">
- 		   #post-meta-form table {
+ 		   #cpm-post-meta-form table {
  			   border-collapse: collapse;
  			   width: 100%;
  		   }
- 		   #post-meta-form th, td {
+ 		   #cpm-post-meta-form th, td {
  			   text-align: left;
  			   padding: 12px;
  		   }
- 		   #post-meta-form tbody tr:nth-child(even) {
+ 		   #cpm-post-meta-form tbody tr:nth-child(even) {
  			   background: #f6f7f7;
  		   }
- 		   #post-meta-form tbody tr:nth-child(even) {
+ 		   #cpm-post-meta-form tbody tr:nth-child(even) {
  			   border-top: solid thin #eaeaea;
  			   border-bottom: solid thin #eaeaea;
  		   }
