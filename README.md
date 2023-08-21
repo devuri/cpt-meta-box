@@ -59,19 +59,19 @@ use DevUri\Meta\Settings;
 class Details extends Settings
 {
     // The metabox settings
-    public function settings($get_meta): void
+    public function settings(): void
     {
         // Basic input field
-        echo self::form()->input('Title', self::meta('title', $get_meta));
+        echo self::form()->input('Title', $this->get_meta('title'));
 
         // Regular textarea
-        echo self::form()->textarea('Description', self::meta('description', $get_meta));
+        echo self::form()->textarea('Description', $this->get_meta('description'));
 
         // Editor using a simplified version of wp_editor
-        echo self::editor('Description', self::meta('description', $get_meta));
+        echo self::editor('Description', $this->get_meta('description'));
     }
 
-    // The data
+    // The data, is $post_data $_POST and needs to be sanitized
     public function data($post_data): array
     {
         return [
