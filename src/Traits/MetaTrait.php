@@ -33,13 +33,12 @@ trait MetaTrait
      *
      * @return string
      */
-    public static function the_id()
+    public function the_id()
     {
-        global $post;
-        if ( ! isset( $post->ID ) ) {
+        if ( ! isset( $this->post_object->ID ) ) {
             return;
         }
-        $id = '<input type="text" value="' . $post->ID . '" disabled>';
+        $id = '<input type="text" value="' . $this->post_object->ID . '" disabled>';
 
         return self::info( 'ID', $id );
     }
@@ -49,16 +48,15 @@ trait MetaTrait
      *
      * @return string
      */
-    public static function thumbnail()
+    public function thumbnail()
     {
-        global $post;
-        if ( ! isset( $post->ID ) ) {
+        if ( ! isset( $this->post_object->ID ) ) {
             return;
         }
-        if ( ! has_post_thumbnail( $post->ID ) ) {
+        if ( ! has_post_thumbnail( $this->post_object->ID ) ) {
             return;
         }
-        $id    = get_post_meta( $post->ID, '_thumbnail_id', true );
+        $id    = get_post_meta( $this->post_object->ID, '_thumbnail_id', true );
         $image = '<img width="400" src="' . wp_get_attachment_url( $id ) . '" loading="lazy">';
 
         return self::info( '', $image, true );
@@ -127,6 +125,22 @@ trait MetaTrait
     {
         if ( isset( $meta[ $key ] ) ) {
             return $meta[ $key ];
+        }
+
+        return '';
+    }
+
+	/**
+     * Use to get meta data.
+     *
+     * @param string $key  the meta key.
+     *
+     * @return mixed
+     */
+    public function get_meta( string $key ): string
+    {
+        if ( isset( $this->meta_data[ $key ] ) ) {
+            return $this->meta_data[ $key ];
         }
 
         return '';
