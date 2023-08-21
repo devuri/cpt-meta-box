@@ -130,10 +130,10 @@ trait MetaTrait
         return '';
     }
 
-	/**
+    /**
      * Use to get meta data.
      *
-     * @param string $key  the meta key.
+     * @param string $key the meta key.
      *
      * @return mixed
      */

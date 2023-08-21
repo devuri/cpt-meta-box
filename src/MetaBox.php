@@ -2,11 +2,11 @@
 
 namespace DevUri\Meta;
 
+use DevUri\Meta\Contracts\SettingsInterface;
 use DevUri\Meta\Traits\Form;
 use DevUri\Meta\Traits\StyleTrait;
 use Exception;
 use ReflectionClass;
-use DevUri\Meta\Contracts\SettingsInterface;
 
 class MetaBox
 {
@@ -51,6 +51,8 @@ class MetaBox
     /**
      * Metabox build.
      *
+     * @param null|mixed $post_object
+     *
      * @return SettingsInterface settings
      */
     public function build( $post_object = null ): SettingsInterface
@@ -88,7 +90,8 @@ class MetaBox
     /**
      * Meta box display callback.
      *
-     * @param WP_Post $post Current post object.
+     * @param WP_Post $post        Current post object.
+     * @param mixed   $post_object
      */
     public function render( $post_object ): void
     {
@@ -96,21 +99,21 @@ class MetaBox
 		<div id="cpm-post-meta-form" style="margin: -12px;">
 			<?php
 
-			echo self::form()->table( 'open' );
+            echo self::form()->table( 'open' );
 
-			/**
-			 * Settings.
-			 */
-			try {
-				$this->build( $post_object )->settings();
-				// echo self::show_field_id( $this->meta_field );
-			} catch ( Exception $e ) {
-				print 'Exception: ' . $e->getMessage();
-			}
+        /**
+         * Settings.
+         */
+        try {
+            $this->build( $post_object )->settings();
+            // echo self::show_field_id( $this->meta_field );
+        } catch ( Exception $e ) {
+            print 'Exception: ' . $e->getMessage();
+        }
 
-			echo self::form()->table( 'close' );
-			self::form()->nonce();
-			?>
+        echo self::form()->table( 'close' );
+        self::form()->nonce();
+        ?>
 	   </div>
 		<?php
     }
@@ -120,30 +123,30 @@ class MetaBox
      *
      * @param int $post_id .
      *
-     * @return bool
+     * @return void
      */
-    public function save_meta_data( int $post_id ): bool
+    public function save_meta_data( int $post_id ): void
     {
         if ( \defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) {
-            return false;
+            return;
         }
 
         if ( ! current_user_can( 'edit_post', $post_id ) ) {
-            return false;
+            return;
         }
 
         global $post;
 
         if ( ! \is_object( $post ) ) {
-            return false;
+            return;
         }
 
         if ( $post->post_type != $this->post_type ) {
-            return false;
+            return;
         }
 
         if ( ! self::form()->verify_nonce() ) {
-            return false;
+            return;
         }
 
         // data to save.
@@ -166,6 +169,8 @@ class MetaBox
          * @param array  $this->data the data being saved.
          * @param int    $post_id    The post ID.
          * @param object $post       The global $post object.
+         *
+         * @phpstan-ignore-next-line
          */
         do_action( 'cpm_before_meta_update', $this->data, $post_id, $post );
 
@@ -185,10 +190,10 @@ class MetaBox
          * @param array  $this->data the data being saved.
          * @param int    $post_id    The post ID.
          * @param object $post       The global $post object.
+         *
+         * @phpstan-ignore-next-line
          */
         do_action( 'cpm_after_meta_update', $this->data, $post_id, $post );
-
-        return true;
     }
 
     /**
