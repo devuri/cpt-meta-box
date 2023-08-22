@@ -90,7 +90,11 @@ new MetaBox($details);
 // Create a meta box with zebra table
 new MetaBox($details, true);
 
+// Create a meta box with 	NO zebra table
+new MetaBox($details, false);
+
 // Create a meta box with a custom label 'Vehicle Details'
+// and the meta key will be `vehicle-details_cpm`
 new MetaBox($details, ['name' => 'Vehicle Details']);
 
 // Create a meta box with a custom label 'Vehicle Details' and zebra stripes
@@ -102,7 +106,8 @@ new MetaBox($details, [
 // Zebra styles are applied by default, this will also use zebra style
 new MetaBox($details, ['name' => 'Vehicle Details']);
 
-// Or instantiate directly
+// Or instantiate directly, in this case the metabox will be `Details` based on the class name
+// and the meta key will be `details_cpm`
 new MetaBox(new Details('vehicle'));
 ```
 
@@ -154,8 +159,28 @@ $editLink = Data::edit(123);
 // Get a value from an array by its key
 $value = Data::getkey('key_name', $dataArray);
 
-// Retrieve the latest 5 posts
-$latestPosts = $data->items(5);
+// Retrieve the latest 10 posts
+$latestPosts = $data->items(10);
+
+// Retrieve the latest 10 posts,
+// you can pass in array of arguments to filter retrieved posts.
+// See WP_Query::parse_query() for all available arguments.
+$latestPosts = $data->items(10, [ 'orderby' => 'date' ]);
+
+// if no arguments are provided these will be used.
+$defaults = [
+	'numberposts'      => 5,
+	'category'         => 0,
+	'orderby'          => 'date',
+	'order'            => 'DESC',
+	'include'          => array(),
+	'exclude'          => array(),
+	'meta_key'         => '',
+	'meta_value'       => '',
+	'post_type'        => 'vehicle', // based on the current Data class.
+	'suppress_filters' => true,
+];
+
 ```
 
 In this example, we create a `Data` object for the 'vehicle' post type and use its methods to retrieve post items, post meta data, generate an edit link, get a value from an array, and retrieve the latest posts. You can adapt these examples to suit your specific needs.

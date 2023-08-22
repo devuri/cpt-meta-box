@@ -116,7 +116,7 @@ class Data
     public function meta( $ID, $name = null )
     {
         if ( \is_null( $name ) ) {
-            $name = $this->post_type . '_meta';
+            $name = $this->post_type . '_cpm';
         }
         $meta_data              = get_post_meta( $ID, $name, true );
         $meta_data['thumbnail'] = get_post_thumbnail_id( $ID );
@@ -129,16 +129,29 @@ class Data
      * Retrieves an array of the latest posts,
      * or posts matching the given criteria.
      *
-     * @param int $n number of posts to get.
+     * @param int $number_posts Total number of posts to retrieve. Is an alias of $posts_per_page in WP_Query. Accepts -1 for all. Default 5.
+     * @param array $params Arguments to retrieve posts.
      *
      * @return array Array of post objects or post IDs.
+     * @link https://developer.wordpress.org/reference/functions/get_posts/
      */
-    public function items( $n = -1 ): array
+    public function items( int $number_posts = 5, array $params = [ 'orderby' => 'date' ] ): array
     {
-        $args = [
-            'numberposts' => $n,
-            'post_type'   => $this->post_type,
-        ];
+		$args = array_merge(
+			[
+				'numberposts'      => $number_posts,
+				'category'         => 0,
+				'orderby'          => 'date',
+				'order'            => 'DESC',
+				'include'          => array(),
+				'exclude'          => array(),
+				'meta_key'         => '',
+				'meta_value'       => '',
+				'post_type'        => $this->post_type,,
+				'suppress_filters' => true,
+	        ],
+			$params
+		);
 
         return get_posts( $args );
     }
