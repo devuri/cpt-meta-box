@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/devuri/cpt-meta-box/compare/v0.3.0...v0.3.1) (2023-08-22)
+
+
+### Bug Fixes
+
+* update docs and `Data` class ([b32bd25](https://github.com/devuri/cpt-meta-box/commit/b32bd2593bf7efbf818dcb59b5fd3a29c9bd1baf))
+
 ## [0.3.0](https://github.com/devuri/cpt-meta-box/compare/v0.2.3...v0.3.0) (2023-08-21)
 
 
