@@ -1,8 +1,8 @@
 <?php
 
-namespace DevUri\Meta\Traits;
+namespace DevUri\PostTypeMeta\Traits;
 
-use DevUri\Meta\Editor;
+use DevUri\PostTypeMeta\Editor;
 use WPAdminPage\FormHelper;
 
 trait Form

@@ -1,6 +1,6 @@
 <?php
 
-namespace DevUri\Meta\Contracts;
+namespace DevUri\PostTypeMeta\Contracts;
 
 use WPAdminPage\FormHelper;
 

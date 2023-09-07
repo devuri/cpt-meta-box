@@ -1,10 +1,10 @@
 <?php
 
-namespace DevUri\Meta;
+namespace DevUri\PostTypeMeta;
 
-use DevUri\Meta\Contracts\SettingsInterface;
-use DevUri\Meta\Traits\Form;
-use DevUri\Meta\Traits\MetaTrait;
+use DevUri\PostTypeMeta\Contracts\SettingsInterface;
+use DevUri\PostTypeMeta\Traits\Form;
+use DevUri\PostTypeMeta\Traits\MetaTrait;
 use Exception;
 
 abstract class Settings implements SettingsInterface

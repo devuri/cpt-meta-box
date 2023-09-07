@@ -1,7 +1,7 @@
 <?php
 
-use DevUri\Meta\MetaBox;
-use DevUri\Meta\Settings;
+use DevUri\PostTypeMeta\MetaBox;
+use DevUri\PostTypeMeta\Settings;
 
 // implement meta fields
 class Details extends Settings

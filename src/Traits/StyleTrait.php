@@ -1,6 +1,6 @@
 <?php
 
-namespace DevUri\Meta\Traits;
+namespace DevUri\PostTypeMeta\Traits;
 
 trait StyleTrait
 {
