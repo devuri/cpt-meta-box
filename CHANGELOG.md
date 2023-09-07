@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.4.0](https://github.com/devuri/cpt-meta-box/compare/v0.3.1...v0.4.0) (2023-09-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* namespace update `DevUri\Meta` is now `DevUri\PostTypeMeta`
+
+### Features
+
+* namespace update `DevUri\Meta` is now `DevUri\PostTypeMeta` ([1023c49](https://github.com/devuri/cpt-meta-box/commit/1023c49cb8d20a1c2c5f5c622717abd56dcf74de))
+
 ## [0.3.1](https://github.com/devuri/cpt-meta-box/compare/v0.3.0...v0.3.1) (2023-08-22)
 
 
