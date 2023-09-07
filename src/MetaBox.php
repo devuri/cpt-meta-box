@@ -1,10 +1,10 @@
 <?php
 
-namespace DevUri\Meta;
+namespace DevUri\PostTypeMeta;
 
-use DevUri\Meta\Contracts\SettingsInterface;
-use DevUri\Meta\Traits\Form;
-use DevUri\Meta\Traits\StyleTrait;
+use DevUri\PostTypeMeta\Contracts\SettingsInterface;
+use DevUri\PostTypeMeta\Traits\Form;
+use DevUri\PostTypeMeta\Traits\StyleTrait;
 use Exception;
 use ReflectionClass;
 

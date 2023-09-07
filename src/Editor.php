@@ -1,6 +1,6 @@
 <?php
 
-namespace DevUri\Meta;
+namespace DevUri\PostTypeMeta;
 
 class Editor
 {

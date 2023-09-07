@@ -52,8 +52,8 @@ To use the `Settings` class, follow these steps:
 The following example demonstrates the usage of the `MetaBox` and `Settings` classes:
 
 ```php
-use DevUri\Meta\MetaBox;
-use DevUri\Meta\Settings;
+use DevUri\PostTypeMeta\MetaBox;
+use DevUri\PostTypeMeta\Settings;
 
 // Implement meta fields
 class Details extends Settings
@@ -142,7 +142,7 @@ The `Data` class provides the following methods:
 Here's an example of how you can utilize the `Data` class:
 
 ```php
-use DevUri\Meta\Data;
+use DevUri\PostTypeMeta\Data;
 
 // Create a new instance of the Data class for the 'vehicle' post type
 $data = Data::init('vehicle');
