@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/devuri/cpt-meta-box/compare/v0.4.0...v0.4.1) (2023-09-08)
+
+
+### Bug Fixes
+
+* update php req `^7.1 || ^7.4 || ^8.0 || ^8.1` ([81ffe60](https://github.com/devuri/cpt-meta-box/commit/81ffe60c2b34cbca7f2cf54c85379be09356cf80))
+
 ## [0.4.0](https://github.com/devuri/cpt-meta-box/compare/v0.3.1...v0.4.0) (2023-09-07)
 
 
