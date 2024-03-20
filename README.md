@@ -150,6 +150,9 @@ $data = Data::init('vehicle');
 // Get a list of post items
 $postItems = $data->list();
 
+// If you are not using the post type name as meta name you need to pass in the name in this example `details_cpm`:
+$metaData = $data->meta(123, 'details_cpm);
+
 // Retrieve the meta data for a specific post
 $metaData = $data->meta(123);
 
