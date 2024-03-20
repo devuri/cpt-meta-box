@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.2](https://github.com/devuri/cpt-meta-box/compare/v0.4.1...v0.4.2) (2024-03-20)
+
+
+### Bug Fixes
+
+* fix empty array ([fbe3d32](https://github.com/devuri/cpt-meta-box/commit/fbe3d32a6428acd9815d295c4e3f0d252360fec4))
+
 ## [0.4.1](https://github.com/devuri/cpt-meta-box/compare/v0.4.0...v0.4.1) (2023-09-08)
 
 
