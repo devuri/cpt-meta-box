@@ -147,7 +147,7 @@ class Data
 				'exclude'          => array(),
 				'meta_key'         => '',
 				'meta_value'       => '',
-				'post_type'        => $this->post_type,,
+				'post_type'        => $this->post_type,
 				'suppress_filters' => true,
 	        ],
 			$params
