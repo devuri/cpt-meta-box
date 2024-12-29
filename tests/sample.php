@@ -1,13 +1,23 @@
 <?php
 
-use DevUri\PostTypeMeta\MetaBox;
-use DevUri\PostTypeMeta\Settings;
+/*
+ * This file is part of the cptMeta package.
+ *
+ * (c) Uriel Wilson
+ *
+ * The full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+use Urisoft\PostMeta\MetaBox;
+use Urisoft\PostMeta\Settings;
 
 // implement meta fields
 class Details extends Settings
 {
     /**
-     * the metabox settings
+     * the metabox settings.
+     *
      * @param $get_meta
      */
     public function settings(): void
@@ -26,8 +36,10 @@ class Details extends Settings
     }
 
     /**
-     * the data
+     * the data.
+     *
      * @param $post_data
+     *
      * @return array
      */
     public function data($post_data): array
@@ -45,24 +57,25 @@ class Details extends Settings
 $details = new Details("vehicle");
 
 // adds metabox no stripes.
-new MetaBox($details);
+(new MetaBox($details))->register();
 
 // adds metabox with zebra table.
-new MetaBox($details, true);
+(new MetaBox($details))->register();
 
 // set metabox name `Vehicle Details` as label.
-new MetaBox($details, ["name" => "Vehicle Details"]);
+(new MetaBox($details, ["name" => "Vehicle Details"]))->register();
 
 // set metabox name `Vehicle Details` as label and zebra stripes
-new MetaBox($details, [
+(new MetaBox($details, [
     "name" => "Vehicle Details",
     "zebra" => true,
-]);
+]))->register();
 
 // zebra styles are applied by default, this will also use zebra style.
-new MetaBox($details, [
+(new MetaBox($details, [
     "name" => "Vehicle Details",
-]);
+]))->register();
+;
 
 // or
-new MetaBox(new Details("vehicle"));
+(new MetaBox(new Details("vehicle")))->register();

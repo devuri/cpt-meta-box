@@ -85,30 +85,33 @@ class Details extends Settings
 $details = new Details('vehicle');
 
 // Create a meta box without stripes
-new MetaBox($details);
+(new MetaBox($details, ['zebra' => false]))->register();
 
 // Create a meta box with zebra table
-new MetaBox($details, true);
+(new MetaBox($details))->register();
+
+// or
+(new MetaBox($details, ['zebra' => true]))->register();
 
 // Create a meta box with 	NO zebra table
-new MetaBox($details, false);
+(new MetaBox($details, ['zebra' => false]))->register();
 
 // Create a meta box with a custom label 'Vehicle Details'
 // and the meta key will be `vehicle-details_cpm`
-new MetaBox($details, ['name' => 'Vehicle Details']);
+(new MetaBox($details, ['name' => 'Vehicle Details']))->register();
 
 // Create a meta box with a custom label 'Vehicle Details' and zebra stripes
-new MetaBox($details, [
+(new MetaBox($details, [
     'name' => 'Vehicle Details',
     'zebra' => true,
-]);
+]))->register();
 
 // Zebra styles are applied by default, this will also use zebra style
-new MetaBox($details, ['name' => 'Vehicle Details']);
+(new MetaBox($details, ['name' => 'Vehicle Details']))->->register();
 
 // Or instantiate directly, in this case the metabox will be `Details` based on the class name
 // and the meta key will be `details_cpm`
-new MetaBox(new Details('vehicle'));
+(new MetaBox(new Details('vehicle')))->register();
 ```
 
 This example demonstrates how to create a meta box for the 'vehicle' post type using the `MetaBox` and `Settings` classes. The `Details` class is a subclass of `Settings` and defines the meta box settings and data handling. The `MetaBox` class is used to create and display the meta box with various customization options.
@@ -116,7 +119,7 @@ This example demonstrates how to create a meta box for the 'vehicle' post type u
 
 # Data Class
 
-The `Data` class provides various utility methods for working with data in WordPress. It includes functions for retrieving and manipulating post-related data such as post meta, post items, and generating custom edit links.
+The `Data` class provides various utility methods for working with data. It includes functions for retrieving and manipulating post-related data such as post meta, post items, and generating custom edit links.
 
 ## Usage
 
@@ -188,6 +191,5 @@ $defaults = [
 
 In this example, we create a `Data` object for the 'vehicle' post type and use its methods to retrieve post items, post meta data, generate an edit link, get a value from an array, and retrieve the latest posts. You can adapt these examples to suit your specific needs.
 
-### Conclusion
 
 This package provides a simple and easy-to-use way to create MetaBoxes and meta fields in WordPress. If you have any questions or issues, please feel free to submit an issue.
