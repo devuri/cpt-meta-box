@@ -23,7 +23,7 @@ trait Select
      *
      * @return string .
      */
-    public function select($options = [], $fieldname = 'name', $js = null, $required = false): string
+    public function select(array $options = [], $fieldname = 'name', $js = null, $required = false): string
     {
         $fieldname = strtolower($fieldname);
 
@@ -75,7 +75,7 @@ trait Select
      *
      * @return string
      */
-    private static function selected($options = null): string
+    private static function selected(array $options): string
     {
         if (\array_key_exists('selected', $options)) {
             $selected = $options['selected'];

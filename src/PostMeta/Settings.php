@@ -133,4 +133,16 @@ abstract class Settings implements SettingsInterface
 
         return [];
     }
+
+    public function getMeta(?string $key = null)
+    {
+        if (\is_null($key)) {
+            return $this->metaData;
+        }
+        if (isset($this->metaData[$key])) {
+            return $this->metaData[$key];
+        }
+
+        return '';
+    }
 }

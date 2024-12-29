@@ -18,10 +18,11 @@ trait TextArea
      *
      * @param string $fieldname field name
      * @param bool   $required  set the filed to required
+     * @param mixed  $val
      *
      * @return string
      */
-    public function textarea($fieldname = 'name', $required = false): string
+    public function textarea($fieldname = 'name', $val = '', $required = false): string
     {
         $fieldname = strtolower($fieldname);
 
@@ -31,15 +32,16 @@ trait TextArea
         $textarea .= '<th>';
         $textarea .= '<label for="' . str_replace(' ', '_', $fieldname) . '">';
         $textarea .= ucwords(str_replace('_', ' ', $fieldname));
-        $textarea .= $required;
+        // $textarea .= $required;
         $textarea .= '</label>';
         $textarea .= '</th>';
         $textarea .= '<td>';
         $textarea .= '<textarea class="uk-textarea" name="' . str_replace(' ', '_', $fieldname) . '_textarea" rows="8" cols="50">';
+        $textarea .= wp_kses_post($val);
         $textarea .= '</textarea>';
         $textarea .= '<p class="description" id="' . str_replace(' ', '-', $fieldname) . '-description">';
         $textarea .= strtolower(str_replace('_', ' ', $fieldname));
-        $textarea .= $this->isDescription($required);
+        // $textarea .= $this->isDescription($required);
         $textarea .= '</p>';
         $textarea .= '</td>';
         $textarea .= '</tr>';

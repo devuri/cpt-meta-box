@@ -43,7 +43,7 @@ trait Input
                 'disabled' => false,
                 'info'     => false,
                 'width'    => '200',
-                'icon'    => null,
+                'icon'    => 'dashicons-arrow-right',
             ],
             $args,
         );
@@ -60,17 +60,8 @@ trait Input
         // field name ID.
         $field_name = $params['name'] ?? $field_id;
 
-        // save field in inputs array
-        $this->addField([
-            'id' => $field_id,
-            'name' => $field_name,
-            'params' => $params,
-            'title' => $field_title,
-            'dashicon' => $dashicon,
-        ]);
-
         // return built out the input
-        return \sprintf(
+        $output = \sprintf(
             '<!-- input field %s input -->
             <tr class="input-%s"><th>
                 <span class="dashicons %s"></span>
@@ -119,6 +110,18 @@ trait Input
             // submit button
             $this->inputButton($params['button'])
         );
+
+        // save field in inputs array
+        $this->addField([
+            'id' => $field_id,
+            'name' => $field_name,
+            'params' => $params,
+            'title' => $field_title,
+            'dashicon' => $dashicon,
+            'output' => $output,
+        ]);
+
+        return $output;
     }
 
     /**

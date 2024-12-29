@@ -39,6 +39,7 @@ class Form
 
     public function __construct(?array $context = [])
     {
+        $this->fields = [];
         $this->context = $context;
     }
 

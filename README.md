@@ -39,7 +39,10 @@ Create a custom post type for "Vehicles":
 use Urisoft\PostMeta\PostType;
 
 // Register a "Vehicle" post type
-$vehiclePostType = new PostType('vehicle', 'Vehicle', 'Vehicles');
+$vehiclePostType = new PostType('vehicle', 'Vehicle', 'Vehicles',[
+	'menu_icon' => 'dashicons-car',
+	'supports' => ['title', 'thumbnail'],
+]);
 $vehiclePostType->register();
 ```
 
@@ -54,17 +57,22 @@ use Urisoft\PostMeta\Settings;
 
 class VehicleSettings extends Settings
 {
-    public function settings(): void
+	public function settings(): void
     {
-        echo self::form()->input('Vehicle Name', $this->get_meta('vehicle_name'));
-        echo self::form()->textarea('Description', $this->get_meta('description'));
-        echo self::form()->select('Type', $this->get_meta('type'), [
+        echo self::form()->input('Vehicle Name', $this->getMeta('vehicle_name'), [
+            'placeholder' => 'Enter the vehicle name',
+        ]);
+        echo self::form()->textarea('Description', $this->getMeta('description'));
+		echo self::form()->select([
             'car' => 'Car',
             'truck' => 'Truck',
             'motorcycle' => 'Motorcycle',
+            'selected' => $this->getMeta('type'),
+        ],'Type');
+        echo self::form()->input('Top Speed (mph)', $this->getMeta('top_speed'), [
+            'type' => 'number',
+            'placeholder' => 'Enter top speed in mph',
         ]);
-        echo self::form()->input('Top Speed (mph)', $this->get_meta('top_speed'), ['type' => 'number']);
-        echo self::form()->checkbox('Electric Vehicle', $this->get_meta('is_electric'));
     }
 
     public function data($post_data): array

@@ -119,7 +119,7 @@ class MetaBox
         }
 
         echo $this->form()->table('close');
-        $this->form()->nonce();
+        $this->form()->nonce($this->metaId);
         ?>
         </div>
         <?php
@@ -146,7 +146,7 @@ class MetaBox
             return;
         }
 
-        if ( ! $this->form()->verifyNonce()) {
+        if ( ! $this->form()->verifyNonce($this->metaId)) {
             return;
         }
 

@@ -66,14 +66,10 @@ trait Nonce
      *
      * @see https://developer.wordpress.org/reference/functions/wp_verify_nonce/
      */
-    public function verifyNonce(?string $noncefield = null): bool
+    public function verifyNonce(?string $noncefield = '_cptmeta_wpnonce'): bool
     {
         if ($noncefield && isset($_POST[$noncefield])) {
             return wp_verify_nonce($_POST[$noncefield]);
-        }
-
-        if (isset($_POST[$this->wpnonce])) {
-            return wp_verify_nonce($_POST[$this->wpnonce]);
         }
 
         return false;
