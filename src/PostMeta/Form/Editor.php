@@ -1,24 +1,27 @@
 <?php
 
-namespace DevUri\PostTypeMeta;
+/*
+ * This file is part of the cptMeta package.
+ *
+ * (c) Uriel Wilson
+ *
+ * The full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Urisoft\PostMeta\Form;
 
 class Editor
 {
     protected $content = '';
     protected $id      = 'new_editor';
     protected $toolbar = [];
-
-    /**
-     * Private $instance.
-     *
-     * @var
-     */
     private static $instance;
 
-    public function __construct( string $id, $content )
+    public function __construct(string $id, $content)
     {
         $this->content = $content;
-        $this->id      = strtolower( $id );
+        $this->id      = strtolower($id);
         $this->toolbar = [
             'bold',
             'italic',
@@ -48,10 +51,10 @@ class Editor
      *
      * @return Editor
      */
-    public static function init( $id, $content )
+    public static function init($id, $content)
     {
-        if ( ! isset( self::$instance ) ) {
-            self::$instance = new self( $id, $content );
+        if ( ! isset(self::$instance)) {
+            self::$instance = new self($id, $content);
         }
 
         return self::$instance;
@@ -72,12 +75,12 @@ class Editor
             'media_buttons' => false,
             'quicktags'     => false,
             'tinymce'       => [
-                'toolbar1' => implode( ',', $this->toolbar ),
+                'toolbar1' => implode(',', $this->toolbar),
                 'toolbar2' => '',
                 'toolbar3' => '',
             ],
         ];
-        wp_editor( $this->content, $this->id . '_textarea', $args );
+        wp_editor($this->content, $this->id . '_textarea', $args);
 
         return ob_get_clean();
     }
@@ -89,10 +92,10 @@ class Editor
      */
     public function get()
     {
-        $name  = str_replace( ' ', '_', $this->id );
-        $label = ucwords( str_replace( '_', ' ', $name ) );
+        $name  = str_replace(' ', '_', $this->id);
+        $label = ucwords(str_replace('_', ' ', $name));
 
-        return sprintf(
+        return \sprintf(
             '<tr class="input">
 		    <th><label for="%1$s">%2$s</label></th>
 			    <td>%3$s</td>

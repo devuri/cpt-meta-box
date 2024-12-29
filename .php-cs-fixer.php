@@ -1,32 +1,49 @@
 <?php
 
+$sourceCodeHeader = <<<'EOF'
+This file is part of the cptMeta package.
+
+(c) Uriel Wilson
+
+The full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+EOF;
+
 $finder = Symfony\Component\Finder\Finder::create()
-    ->notPath('assets/*')
-	->notPath('bin')
-	->notPath('build')
-	->notPath('docs')
-	->notPath('tmp')
-	->notPath('vendor')
-	->in([
-        __DIR__,
+    ->exclude([
+        'assets',
+        'public',
+        'bin',
+        'build',
+        'docs',
+        'node_modules',
+        'tmp',
+        'vendor',
+        'wordpress',
+        'wp',
     ])
+    ->notPath('tests/stubs.php')
+    ->notPath('src/inc/mu-plugin/wpframework.php')
+    ->notPath('src/inc/stubs/bootstrap.php')
+    ->notPath('src/inc/stubs/wp-config.php')
+    ->in(__DIR__)
     ->name('*.php')
     ->ignoreDotFiles(true)
     ->ignoreVCS(true);
 
 return (new PhpCsFixer\Config())
-	->setRules([
-		'indentation_type' => true,
-
-		// Array.
-		'array_syntax' => ['syntax' => 'short'],
+    ->setRules([
+        '@PSR12' => true,
+        'array_syntax' => ['syntax' => 'short'],
+		'protected_to_private' => false,
+		'header_comment' => ['header' => $sourceCodeHeader],
 
 		// Basic.
 		'braces' => [
-	        'allow_single_line_closure' => false,
-	        'position_after_anonymous_constructs' => 'same',
-	        'position_after_functions_and_oop_constructs' => 'next'
-	    ],
+			'allow_single_line_closure' => false,
+			'position_after_anonymous_constructs' => 'same',
+			'position_after_functions_and_oop_constructs' => 'next'
+		],
 
 		// Casing.
 		'class_reference_name_casing' => true,
@@ -53,12 +70,11 @@ return (new PhpCsFixer\Config())
 		'visibility_required' => true,
 
 		// Comment.
-		'multiline_comment_opening_closing' => true,
+		//'multiline_comment_opening_closing' => true,
 		'no_empty_comment' => true,
 		'no_trailing_whitespace_in_comment' => true,
 		'single_line_comment_spacing' => true,
 		'single_line_comment_style' => true,
-		//'comment_to_phpdoc' => true,
 
 		// Control Structure
 		'control_structure_braces' => true,
@@ -107,7 +123,6 @@ return (new PhpCsFixer\Config())
 		'blank_line_after_namespace' => true,
 		'clean_namespace' => true,
 		'no_leading_namespace_whitespace' => true,
-		'single_blank_line_before_namespace' => true,
 
 		// Operator
 		'concat_space' =>  ['spacing' => 'one'],
@@ -138,12 +153,12 @@ return (new PhpCsFixer\Config())
 		// PHPDoc
 		'align_multiline_comment' => true,
 		'general_phpdoc_annotation_remove' => true,
+		'align_multiline_comment' => true,
 		'no_empty_phpdoc' => true,
 		'phpdoc_add_missing_param_annotation' => true,
 		'phpdoc_align' => true,
 		'phpdoc_indent' => true,
 		'phpdoc_line_span' => true,
-		'phpdoc_inline_tag_normalizer' => true,
 		'phpdoc_no_access' => true,
 		'phpdoc_no_alias_tag' => true,
 		'phpdoc_no_package' => true,
@@ -155,7 +170,7 @@ return (new PhpCsFixer\Config())
 		'phpdoc_summary' => true,
 		'phpdoc_tag_casing' => true,
 		'phpdoc_tag_type' => true,
-		//'phpdoc_to_comment' => true,
+		'phpdoc_to_comment' => true,
 		'phpdoc_trim_consecutive_blank_line_separation' => true,
 		'phpdoc_trim' => true,
 		'phpdoc_types' => true,
@@ -175,10 +190,10 @@ return (new PhpCsFixer\Config())
 
 		// Strict.
 		//'declare_strict_types' => true,
-		// 'strict_comparison' => true, // will break `evp_sanitize_checkbox`
+		//'strict_comparison' => true,
 		'strict_param' => true,
 
-		// Whitespace.
+		//Whitespace.
 		'array_indentation' => true,
 		'blank_line_before_statement' => true,
 		'blank_line_between_import_groups' => true,
@@ -186,18 +201,16 @@ return (new PhpCsFixer\Config())
 		'indentation_type' => true,
 		'line_ending' => true,
 		'method_chaining_indentation' => true,
-		//'no_spaces_around_offset' => true, // conflict with wp.
-		//'no_spaces_inside_parenthesis' => true, // conflict with wp.
+		'no_spaces_around_offset' => true,
+		'no_spaces_inside_parenthesis' => true,
 		'no_trailing_whitespace' => true,
-		//'no_whitespace_in_blank_line' => true,
+		'no_whitespace_in_blank_line' => true,
 		'single_blank_line_at_eof' => true,
 		'statement_indentation' => true,
-		//'types_spaces' => true,
-
-	])
+		'types_spaces' => true,
+    ])
     ->setLineEnding("\n")
-	//->setIndent("\t") // using tabs
-    ->setIndent(str_repeat(' ', 4)) // use 4 spaces
+    ->setIndent(str_repeat(' ', 4)) // Use 4 spaces for indentation
     ->setUsingCache(false)
     ->setRiskyAllowed(true)
     ->setFinder($finder);
