@@ -72,7 +72,7 @@ abstract class Settings implements SettingsInterface
         if ( ! \is_null($context)) {
             $this->form = self::form($context);
         } else {
-            $this->form = self::form(
+            $this->form = self::setForm(
                 [
                     'fields' => $this->fields,
                     'post_type' => $this->postType,
@@ -81,28 +81,51 @@ abstract class Settings implements SettingsInterface
         }
     }
 
+    public function init(): SettingsInterface
+    {
+        $this->settings();
+
+        return $this;
+    }
+
     public function getPostType(): string
     {
         return $this->postType;
     }
 
-    public static function form(?array $context = []): Form
+    public function getForm(): Form
     {
-        return new Form($context);
+        return $this->form;
     }
 
     /**
      * Set up the settings and metadata for a specific post.
      *
-     * @param WP_Post $postObject Current post object.
-     * @param string  $metaField  Meta field name to retrieve data.
+     * @param null|WP_Post $postObject Current post object or null.
+     * @param string       $metaField  Meta field name to retrieve data.
      *
      * @return SettingsInterface
      */
-    public function create(WP_Post $postObject, string $metaField): SettingsInterface
+    public function create(?WP_Post $postObject, string $metaField): SettingsInterface
     {
         $this->postObject = $postObject;
-        $this->metaData = get_post_meta($postObject->ID, $metaField, true) ?: [];
+        $this->metaData = get_post_meta($postObject ? $postObject->ID : 0, $metaField, true) ?: [];
+
+        $fields = $this->form->getFields();
+
+        if (empty($fields)) {
+            return $this->settings();
+        }
+
+        // Process each field.
+        foreach ($fields as $field) {
+            $fieldName = $field['name'];
+            $value = $this->metaData[$fieldName] ?? null;
+
+            // Replace placeholder in the output.
+            $output = str_replace("{{value}}", $value, $field['output']);
+            static::output($output);
+        }
 
         return $this;
     }
@@ -110,20 +133,37 @@ abstract class Settings implements SettingsInterface
     /**
      * Define the settings for the metabox (to be implemented in subclasses).
      */
-    abstract public function settings(): void;
+    public function settings()
+    {
+        // echo $this->input('Vehicle Name', [
+        //     'placeholder' => 'Enter the vehicle name',
+        // ]);
+
+        // always return context.
+        return $this;
+    }
+
+    public function withContext(MetaBox $metaBox): Form
+    {
+        return $this->form->setContext(
+            [
+                'fields' => $this->form->getFields(),
+                'post_type' => $this->postType,
+                'meta' => $metaBox,
+            ]
+        );
+    }
 
     /**
      * Process and sanitize POST data for settings.
      *
-     * @param array $postData POST data, expected to be sanitized.
-     *
      * @return array Sanitized data limited to defined fields.
      */
-    public function data(array $postData): array
+    public function data(): array
     {
         if ( ! empty($this->fields)) {
             return array_filter(
-                array_map('sanitize_text_field', $postData),
+                array_map('sanitize_text_field', $_POST),
                 function ($key) {
                     return \in_array($key, $this->fields, true);
                 },
@@ -144,5 +184,60 @@ abstract class Settings implements SettingsInterface
         }
 
         return '';
+    }
+
+    /**
+     * Outputs the given field item.
+     *
+     * This method takes a string input and echoes it. Useful for displaying
+     * content directly.
+     *
+     * @param string $fieldOutput The string to be outputted.
+     *
+     * @return void This method does not return a value.
+     */
+    protected static function output(string $fieldOutput): void
+    {
+        echo $fieldOutput;
+    }
+
+    protected function textarea(string $fieldtitle, array $params = [])
+    {
+        $fieldId = $this->form->sanitize($fieldtitle);
+        $fieldMeta = $this->getMeta($fieldId);
+
+        return $this->form->textarea($fieldtitle, $fieldMeta, $params);
+    }
+
+    protected function editor(string $fieldtitle)
+    {
+        $fieldId = $this->form->sanitize($fieldtitle);
+        $fieldMeta = $this->getMeta($fieldId);
+
+        return $this->form->editor($fieldtitle, $fieldMeta);
+    }
+
+    protected function input(string $fieldtitle, array $params = [])
+    {
+        $fieldId = $this->form->sanitize($fieldtitle);
+        $fieldMeta = $this->getMeta($fieldId);
+
+        return $this->form->input($fieldtitle, $fieldMeta, $params);
+    }
+
+    protected function select(string $fieldtitle, array $opts = [], array $params = [])
+    {
+        $fieldId = $this->form->sanitize($fieldtitle);
+        $options = array_merge(
+            ['selected' => $this->getMeta($fieldId)],
+            $opts,
+        );
+
+        return $this->form->select($fieldtitle, $options, $params);
+    }
+
+    private static function setForm(?array $context = []): Form
+    {
+        return new Form($context);
     }
 }

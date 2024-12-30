@@ -19,18 +19,27 @@ class PostType
     protected $args = [];
     protected $labels = [];
     protected $taxonomies = [];
+    protected $singularName;
+    protected $pluralName;
 
-    public function __construct(string $postType, string $singularName, string $pluralName, array $args = [])
+    public function __construct(string $postType, ?string $singularName = null, ?string $pluralName = null, array $args = [])
     {
         $this->postType = $postType;
-        $this->labels = $this->generateLabels($singularName, $pluralName);
+        $this->labels = $this->setLabel($singularName, $pluralName);
         $this->args = array_merge($this->defaultArgs(), $args, ['labels' => $this->labels]);
+    }
 
-        $this->validateRegistration();
+    public function exists(): bool
+    {
+        return post_type_exists($this->postType);
     }
 
     public function register(): void
     {
+        if (post_type_exists($this->postType)) {
+            return;
+        }
+
         add_action('init', [$this, 'registerPostType']);
         add_action('init', [$this, 'registerTaxonomies']);
     }
@@ -133,8 +142,20 @@ class PostType
         });
     }
 
-    protected function validateRegistration(): void
+    protected function setLabel(?string $singularName, ?string $pluralName): array
     {
+        $this->singularName = ! empty($singularName) ? $singularName : ucfirst($singularName);
+        $this->pluralName = ! empty($pluralName) ? $pluralName : ucfirst(self::pluralize($this->postType));
+
+        return $this->generateLabels($this->singularName, $this->pluralName);
+    }
+
+    protected function validateRegistration(bool $withException = false)
+    {
+        if ( ! $withException) {
+            return post_type_exists($this->postType);
+        }
+
         if (post_type_exists($this->postType)) {
             throw new Exception("Post type '{$this->postType}' already exists.");
         }
@@ -192,7 +213,8 @@ class PostType
             'menu_icon' => null,
             'capability_type' => 'post',
             'hierarchical' => false,
-            'supports' => ['title', 'editor', 'thumbnail'],
+            // 'supports' => ['title', 'editor', 'thumbnail'],
+            'supports' => ['title', 'thumbnail'],
             'has_archive' => true,
             'rewrite' => ['slug' => $this->postType],
             'query_var' => true,
@@ -202,5 +224,46 @@ class PostType
             'rest_base' => $this->postType,
             'rest_controller_class' => 'WP_REST_Posts_Controller',
         ];
+    }
+
+    /**
+     * Pluralizes an English word.
+     *
+     * @param string $word The word to pluralize.
+     *
+     * @return string The pluralized word.
+     */
+    protected static function pluralize(string $word): string
+    {
+        $irregulars = [
+            'child' => 'children',
+            'man' => 'men',
+            'woman' => 'women',
+            'mouse' => 'mice',
+            'person' => 'people',
+            'tooth' => 'teeth',
+            'foot' => 'feet',
+        ];
+
+        if (isset($irregulars[$word])) {
+            return $irregulars[$word];
+        }
+
+        // Words ending in -y, but not preceded by a vowel
+        if (preg_match('/[^aeiou]y$/i', $word)) {
+            return preg_replace('/y$/', 'ies', $word);
+        }
+
+        // Words ending in -s, -x, -z, -ch, -sh
+        if (preg_match('/(s|x|z|ch|sh)$/i', $word)) {
+            return $word . 'es';
+        }
+
+        // Words ending in -f or -fe
+        if (preg_match('/(?:f|fe)$/i', $word)) {
+            return preg_replace('/(?:f|fe)$/', 'ves', $word);
+        }
+
+        return $word . 's';
     }
 }

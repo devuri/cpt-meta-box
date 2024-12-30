@@ -49,6 +49,75 @@ class Form
         $this->context = $context;
     }
 
+    public function setContext(array $context = []): self
+    {
+        $this->context = $context;
+
+        return $this;
+    }
+
+    public function getContext(): ?array
+    {
+        return $this->context;
+    }
+
+
+    /**
+     * Generates a form field based on the specified parameters.
+     *
+     * This method creates a form field of the type specified in the `$params['field']` parameter.
+     * Supported field types are `input`, `textarea`, `select`, and `editor`. Each field type
+     * requires specific parameters to be passed in `$params`.
+     *
+     * @param array $params {
+     *                      Optional. Parameters for the form field. Default empty array.
+     *
+     * @var string $field   Required. The type of field to generate. Supported values are
+     *             'input', 'textarea', 'select', and 'editor'.
+     * @var string $label   Optional. The label for the form field. Required for all field types.
+     * @var mixed  $val     Optional. The value for the form field. Required for 'input', 'textarea', and 'editor'.
+     * @var array  $options Optional. The options for the 'select' field type. Required for 'select'.
+     * @var string $id      Optional. The ID for the 'editor' field type. Required for 'editor'.
+     *             }
+     *
+     * @throws InvalidArgumentException If the required 'field' parameter is missing or invalid,
+     *                                  or if other required parameters for the field type are missing.
+     */
+    public function make(array $params = []): void
+    {
+        if (empty($params['field'])) {
+            throw new InvalidArgumentException('The "field" parameter is required and cannot be empty.');
+        }
+
+        // Map the field type to the corresponding method
+        switch ($params['field']) {
+            case 'input':
+                $this->validateParams(['label', 'val'], $params);
+                $this->input($params['label'], $params['val'], $params);
+
+                break;
+            case 'textarea':
+                $this->validateParams(['label', 'val'], $params);
+                $this->textarea($params['label'], $params['val'], $params);
+
+                break;
+            case 'select':
+                $this->validateParams(['label', 'options'], $params);
+                $this->select($params['label'], $params['options'], $params);
+
+                break;
+            case 'editor':
+                $this->validateParams(['label', 'val', 'id'], $params);
+                $this->editor($params['label'], $params['val'], $params['id'], $params);
+
+                break;
+            default:
+                throw new InvalidArgumentException(
+                    'Invalid field type. Supported types are "input", "textarea", "select", or "editor".'
+                );
+        }
+    }
+
     /**
      * Retrieves the fields property.
      *
@@ -62,113 +131,106 @@ class Form
     /**
      * Generates an HTML table row containing a textarea field.
      *
-     * @param string $fieldname Optional. The name of the textarea field. Default is 'name'.
-     * @param string $val       Optional. The initial content for the textarea. Default is an empty string.
-     * @param bool   $required  Optional. Whether the field is required. Default is false.
+     * @param string $fieldTitle Optional. The name of the textarea field. Default is 'name'.
+     * @param string $val        Optional. The initial content for the textarea. Default is an empty string.
+     * @param bool   $required   Optional. Whether the field is required. Default is false.
      *
      * @return string The generated HTML for the textarea field.
      */
-    public function textarea($fieldname = 'name', $val = '', $required = false): string
+    public function textarea($fieldTitle = 'name', $val = '', array $args = []): string
     {
-        $fieldname = strtolower($fieldname);
+        $fieldTitle = strtolower($fieldTitle);
+        $fieldId = $this->sanitize($fieldTitle);
+        $fieldName = $this->sanitize($fieldTitle . '_textarea');
+        $title = ucwords(str_replace('_', ' ', $fieldTitle));
+        $params = $this->getParams($args);
+        $value = empty($val) ? '{{value}}' : $val;
 
-        // lets build out the textarea
-        $textarea  = '<!-- ' . $fieldname . '_textarea -->';
-        $textarea .= '<tr class="textarea">';
-        $textarea .= '<th>';
-        $textarea .= '<label for="' . str_replace(' ', '_', $fieldname) . '">';
-        $textarea .= ucwords(str_replace('_', ' ', $fieldname));
-        // $textarea .= $required;
-        $textarea .= '</label>';
-        $textarea .= '</th>';
-        $textarea .= '<td>';
-        $textarea .= '<textarea class="uk-textarea" name="' . str_replace(' ', '_', $fieldname) . '_textarea" rows="8" cols="50">';
-        $textarea .= wp_kses_post($val);
-        $textarea .= '</textarea>';
-        $textarea .= '<p class="description" id="' . str_replace(' ', '-', $fieldname) . '-description">';
-        $textarea .= strtolower(str_replace('_', ' ', $fieldname));
-        // $textarea .= $this->isDescription($required);
-        $textarea .= '</p>';
-        $textarea .= '</td>';
-        $textarea .= '</tr>';
-        $textarea .= '<!-- ' . $fieldname . '_textarea -->';
+        // Build out the textarea using sprintf
+        $textareaOutput = \sprintf(
+            '<!-- %1$s_textarea -->
+             <tr class="textarea">
+                 <th>
+                     <label for="%2$s">%3$s</label>
+                 </th>
+                 <td>
+                     <textarea class="uk-textarea" name="%2$s" rows="8" cols="50">%4$s</textarea>
+                     <p class="description" id="%5$s-description">%1$s</p>
+                 </td>
+             </tr>
+             <!-- %1$s_textarea -->',
+            $fieldTitle,                           // %1$s: Field title (lowercase)
+            $fieldName,                            // %2$s: Field ID (sanitized)
+            $title,                                // %3$s: Field title (formatted)
+            wp_kses_post($value),                    // %4$s: Value (escaped)
+            $this->sanitize($fieldTitle, true) // %5$s: Sanitized description ID
+        );
 
-        return $textarea;
+        // Save field in inputs array
+        $this->addField([
+            'id' => $fieldId,
+            'name' => $fieldName,
+            'field' => 'textarea',
+            'title' => $fieldTitle,
+            'output' => $textareaOutput,
+        ]);
+
+        return $textareaOutput;
     }
 
     /**
      * Alias for the `textarea` method, generating a text area field.
      *
-     * @param string $fieldname Optional. The name of the text area field. Default is 'name'.
-     *  @param string $val      Optional. The initial content for the textarea. Default is an empty string.
-     * @param bool   $required  Optional. Whether the field is required. Default is false.
+     * @param string $fieldTitle Optional. The name of the text area field. Default is 'name'.
+     * @param string $val        Optional. The initial content for the textarea. Default is an empty string.
+     * @param bool   $required   Optional. Whether the field is required. Default is false.
      *
      * @return string The generated HTML for the text area field.
      */
-    public function text_area($fieldname = 'name', $val = '', $required = false): string
+    public function text_area($fieldTitle = 'name', $val = '', $required = false): string
     {
-        return $this->textarea($fieldname, $val, $required);
+        return $this->textarea($fieldTitle, $val, $required);
     }
 
     /**
      * Generates a table row containing a WordPress editor field.
      *
-     * @param string      $fieldname The name of the field, used for the editor's label and attributes.
-     * @param string      $content   Optional. The initial content for the editor. Default is an empty string.
-     * @param null|string $editor_id Optional. The ID for the editor instance. Defaults to the sanitized fieldname.
-     * @param array       $options   Optional. Additional settings for the editor. Default is an empty array.
+     * @param string      $fieldTitle The name of the field, used for the editor's label and attributes.
+     * @param string      $content    Optional. The initial content for the editor. Default is an empty string.
+     * @param null|string $editor_id  Optional. The ID for the editor instance. Defaults to the sanitized fieldname.
+     * @param array       $options    Optional. Additional settings for the editor. Default is an empty array.
      *
      * @return string The generated HTML table row containing the WordPress editor.
      */
-    public function editor(string $fieldname, $content = '', ?string $editor_id = null, $options = []): string
+    public function editor(string $fieldTitle, $content = '', ?string $editor_id = null, $options = []): string
     {
-        $fieldname    = strtolower($fieldname);
-        $textfield_id = \is_null($editor_id) ? str_replace(' ', '_', $fieldname) : $editor_id;
+        $fieldTitle    = strtolower($fieldTitle);
+        $textfield_id = \is_null($editor_id) ? $this->sanitize($fieldTitle) : $editor_id;
+        $fieldLabel = ucwords(str_replace('_', ' ', $textfield_id));
+        $value = empty($content) ? '{{value}}' : $content;
 
-        return '<tr class="input">
-          <th><label for="' . str_replace(' ', '_', $fieldname) . '">
-          ' . ucwords(str_replace('_', ' ', $fieldname)) . '
+        $editorOutput = '<tr class="input">
+          <th><label for="' . $this->sanitize($fieldTitle, true) . '">
+          ' . $fieldLabel . '
           </label></th>
         <td width="640">
-          ' . $this->wpeditor($content, $textfield_id, $options = []) . '
-          <p class="description" id="' . str_replace(' ', '_', $fieldname) . '">' . str_replace('_', ' ', $fieldname) . '.</p>
+          ' . $this->wpeditor($value, $textfield_id, $options = []) . '
+          <p class="description" id="' . $textfield_id . '">' . str_replace('_', ' ', $fieldTitle) . '.</p>
           </td>
         </tr>';
-    }
 
-    /**
-     * Renders a basic version of the WordPress editor.
-     *
-     * @param string $content   Optional. The initial content for the editor. Default is an empty string.
-     * @param string $editor_id Optional. The ID for the editor instance. Default is 'new_editor'.
-     * @param array  $options   Optional. Additional settings for the editor. Default includes:
-     *                          - 'media_buttons' => false
-     *                          - 'quicktags'     => false
-     *                          - 'tinymce'       => Custom toolbar configuration.
-     *
-     * @return false|string The rendered HTML for the editor, or false on failure.
-     *
-     * @see https://developer.wordpress.org/reference/functions/wp_editor/
-     * @see https://developer.wordpress.org/reference/classes/_wp_editors/parse_settings/
-     */
-    public function wpeditor($content = '', $editor_id = 'new_editor', $options = [])
-    {
-        ob_start();
-        $args = array_merge(
+        $this->addField(
             [
-                'media_buttons' => false,
-                'quicktags'     => false,
-                'tinymce'       => [
-                    'toolbar1' => 'bold,italic,underline,separator,alignleft,aligncenter,alignright,separator,bullist,numlist,outdent,indent,blockquote,link,unlink,undo,redo',
-                    'toolbar2' => '',
-                    'toolbar3' => '',
-                ],
-            ],
-            $options
+                'id' => $textfield_id,
+                'title' => $fieldTitle,
+                'label' => $fieldLabel,
+                'options' => $options,
+                'field' => 'editor',
+                'output' => $editorOutput,
+            ]
         );
-        wp_editor($content, $editor_id, $args);
 
-        return ob_get_clean();
+        return $editorOutput;
     }
 
     /**
@@ -188,8 +250,8 @@ class Form
         return \sprintf(
             __(
                 '<div style="font-size: small; margin: 20px; text-transform: capitalize; "
-			id="%1$s" class="notice notice-%3$s is-dismissible">
-			<p>%2$s</p></div>'
+            id="%1$s" class="notice notice-%3$s is-dismissible">
+            <p>%2$s</p></div>'
             ),
             $element_id,
             $message,
@@ -329,57 +391,19 @@ class Form
     }
 
     /**
-     * Outputs an HTML spinner with accompanying CSS for a rotating animation.
-     *
-     * @param array $size An optional array to customize the spinner's size.
-     *                    The first element is used for both width and height if only one value is provided.
-     *                    If two values are provided, the first is the width and the second is the height.
-     *
-     * @return void
-     */
-    public function spinner(array $size = []): void
-    {
-        // Assign default size values
-        $width  = $size[0] ?? '60px';
-        $height = $size[1] ?? $width;
-        // Use the same value for height if only one size is provided
-
-        ?>
-	    <div class="spinner"></div>
-
-	    <style>
-	        .spinner {
-	            width: <?php echo htmlspecialchars($width); ?>;
-	            height: <?php echo htmlspecialchars($height); ?>;
-	            border: 6px solid #000; /* Black border */
-	            border-top-color: #ff0000; /* Red top border */
-	            border-radius: 50%;
-	            animation: spin 0.8s linear infinite;
-	            margin: 100px auto;
-	        }
-
-	        @keyframes spin {
-	            to {
-	                transform: rotate(360deg);
-	            }
-	        }
-	    </style>
-	    <?php
-    }
-
-    /**
      * Generates an HTML select field with a label, options, and optional JavaScript onchange functionality.
      *
-     * @param string $fieldname Optional. The name of the field, used for the select's name, ID, and label. Default is 'name'.
-     * @param array  $options   Optional. An associative array of options for the select field. Keys are option values, values are labels. Default is an empty array.
-     * @param string $js        Optional. JavaScript function to execute on the onchange event. Default is null.
-     * @param bool   $required  Optional. Whether the field is required. Default is false.
+     * @param string $fieldTitle Optional. The name of the field, used for the select's name, ID, and label. Default is 'name'.
+     * @param array  $options    Optional. An associative array of options for the select field. Keys are option values, values are labels. Default is an empty array.
+     * @param string $js         Optional. JavaScript function to execute on the onchange event. Default is null.
+     * @param bool   $required   Optional. Whether the field is required. Default is false.
      *
      * @return string The generated HTML markup for the select field.
      */
-    public function select(string $fieldname = 'name', array $options = [], $js = null, $required = false): string
+    public function select(string $fieldTitle = 'name', array $options = [], array $args = []): string
     {
-        $fieldname = strtolower($fieldname);
+        $fieldTitle = strtolower($fieldTitle);
+        $params = $this->getParams($args);
 
         // Set selected option
         $selected = $this->selected($options);
@@ -389,26 +413,26 @@ class Form
         }
 
         // Prepare JavaScript function
-        $js_function = $js ? $js : '';
+        $js_function = $params['js'];
         $default_select = '<option selected="selected">Select an option</option>';
 
         // Build the select field using sprintf
         $select = \sprintf(
             '<!-- select field %s -->
-	        <tr class="input-%s">
-	            <th>
-	                <label for="%s">%s</label>
-	            </th>
-	            <td>
-	                <select onchange="%s" name="%s" id="%s" class="uk-select">
-	                    %s',
-            str_replace(' ', '-', $fieldname),
-            str_replace(' ', '-', $fieldname),
-            str_replace(' ', '_', $fieldname),
-            ucwords(str_replace('_', ' ', $fieldname)),
+            <tr class="input-%s">
+                <th>
+                    <label for="%s">%s</label>
+                </th>
+                <td>
+                    <select onchange="%s" name="%s" id="%s" class="uk-select">
+                        %s',
+            str_replace(' ', '-', $fieldTitle),
+            str_replace(' ', '-', $fieldTitle),
+            str_replace(' ', '_', $fieldTitle),
+            ucwords(str_replace('_', ' ', $fieldTitle)),
             $js_function,
-            strtolower(str_replace(' ', '_', $fieldname)),
-            strtolower(str_replace(' ', '_', $fieldname)),
+            strtolower(str_replace(' ', '_', $fieldTitle)),
+            strtolower(str_replace(' ', '_', $fieldTitle)),
             $default_select
         );
 
@@ -424,16 +448,16 @@ class Form
 
         $select .= \sprintf(
             '</select>
-	        <strong style="color: #fdc006;">%s</strong>
-	        <p class="description" id="%s-description">%s%s</p>
-	        </td>
-	        </tr>
-	        <!-- select field %s -->',
+            <strong style="color: #696969;margin: 8px;border: solid thin #cdcdcd;padding: 6px 14px;border-radius: 4px;">%s</strong>
+            <p class="description" id="%s-description">%s%s</p>
+            </td>
+            </tr>
+            <!-- select field %s -->',
             ucwords(str_replace('_', ' ', $selected)),
-            str_replace(' ', '-', $fieldname),
-            strtolower(str_replace('_', ' ', $fieldname)),
-            $this->isDescription($required),
-            $fieldname
+            str_replace(' ', '-', $fieldTitle),
+            strtolower(str_replace('_', ' ', $fieldTitle)),
+            $this->isDescription($params['required'] ?? null),
+            $fieldTitle
         );
 
         return $select;
@@ -463,7 +487,7 @@ class Form
         $this->wpnonce = $name;
 
         // Add the nonce field to internal fields.
-        $this->addField(['id' => $name, 'nonce_field' => $this->wpnonce]);
+        $this->addField(['id' => $name, 'field' => 'nonce', 'nonce_field' => $this->wpnonce]);
 
         return $nonceField;
     }
@@ -506,7 +530,7 @@ class Form
      * and an optional submit button. It also includes accessibility features like `aria-describedby`.
      * The function adheres to WordPress coding standards, ensuring compatibility within WordPress projects.
      *
-     * @param string $fieldtitle The name of the field, defaulting to 'item name'. It is sanitized and
+     * @param string $fieldTitle The name of the field, defaulting to 'item name'. It is sanitized and
      *                           used for both the input's name and its label. Two versions of sanitization
      *                           are performed: one for the field name (hyphenated) and one for the field ID (underscored).
      * @param string $val        The default value for the input field.
@@ -522,35 +546,24 @@ class Form
      *
      * @return string The HTML markup for the input field and optional button.
      */
-    public function input($fieldtitle = 'item name', $val = '', array $args = []): string
+    public function input($fieldTitle = 'item name', $val = '', array $args = []): string
     {
-        $params = array_merge(
-            [
-                'name' => null,
-                'required' => false,
-                'class'    => 'uk-input form-control',
-                'type'     => 'text',
-                'button'   => null,
-                'hidden'   => false,
-                'disabled' => false,
-                'info'     => false,
-                'width'    => '200',
-                'icon'    => 'dashicons-arrow-right',
-            ],
-            $args,
-        );
+        $params = $this->getParams($args);
 
         // changed to item-name
-        $field_title = $this->sanitize($fieldtitle, true);
+        $field_title = $this->sanitize($fieldTitle, true);
 
         // dashicons
         $dashicon = $params['icon'] ?? null;
 
         // changed to item_name
-        $field_id = $this->sanitize($fieldtitle);
+        $field_id = $this->sanitize($fieldTitle);
 
         // field name ID.
         $field_name = $params['name'] ?? $field_id;
+
+        // set place vlaue
+        $value = empty($val) ? '{{value}}' : $val;
 
         // return built out the input
         $output = \sprintf(
@@ -588,7 +601,7 @@ class Form
             // describedby
             $field_title,
             // value
-            $val,
+            $value,
             // input class
             esc_attr($params['class']),
             // disabled
@@ -608,8 +621,10 @@ class Form
             'id' => $field_id,
             'name' => $field_name,
             'params' => $params,
+            'field' => $params['type'],
             'title' => $field_title,
             'dashicon' => $dashicon,
+            'value' => $val,
             'output' => $output,
         ]);
 
@@ -631,32 +646,6 @@ class Form
         }
 
         return null;
-    }
-
-    /**
-     * Generates an HTML hidden input field within a table row.
-     *
-     * @param string $fieldtitle Optional. The name attribute for the hidden input field. Default is 'name'.
-     * @param string $val        Optional. The value attribute for the hidden input field. Default is '...'.
-     *
-     * @return string The generated HTML for the hidden input field.
-     */
-    public function inputHidden($fieldtitle = 'name', $val = '...'): string
-    {
-        $fieldtitle = strtolower($fieldtitle);
-
-        // lets build out the input
-        $input_hidden  = '<!-- input field ' . $fieldtitle . '_input -->';
-        $input_hidden .= '<tr class="input">';
-        $input_hidden .= '<th>';
-        $input_hidden .= '</th>';
-        $input_hidden .= '<td>';
-        $input_hidden .= '<input type="hidden" name="' . $this->sanitize($fieldtitle) . '" id="' . $this->sanitize($fieldtitle) . '" value="' . $val . '" class="uk-input">';
-        $input_hidden .= '</td>';
-        $input_hidden .= '</tr>';
-        $input_hidden .= '<!-- input field ' . $fieldtitle . '_input -->';
-
-        return $input_hidden;
     }
 
     /**
@@ -759,33 +748,33 @@ class Form
     /**
      * Generates an HTML upload button field with a label and description.
      *
-     * @param string $fieldname Optional. The name of the upload field. Default is 'upload_image_button'.
-     * @param string $val       Optional. The label for the button. Default is 'Upload Image'.
-     * @param bool   $required  Optional. Whether the field is required. Default is false.
-     * @param string $type      Optional. The input type for the button. Default is 'button'.
+     * @param string $fieldTitle Optional. The name of the upload field. Default is 'upload_image_button'.
+     * @param string $val        Optional. The label for the button. Default is 'Upload Image'.
+     * @param bool   $required   Optional. Whether the field is required. Default is false.
+     * @param string $type       Optional. The input type for the button. Default is 'button'.
      *
      * @return string The generated HTML for the upload button field.
      */
-    public function upload($fieldname = 'upload_image_button', $val = 'Upload Image', $required = false, $type = 'button'): string
+    public function upload($fieldTitle = 'upload_image_button', $val = 'Upload Image', $required = false, $type = 'button'): string
     {
-        $fieldname      = strtolower($fieldname);
+        $fieldTitle      = strtolower($fieldTitle);
         $upload_button  = '<tr class="input">';
         $upload_button .= '<th>';
-        $upload_button .= '<label for="' . str_replace(' ', '_', $fieldname) . '">';
-        $upload_button .= ucwords(str_replace('_', ' ', $fieldname));
+        $upload_button .= '<label for="' . str_replace(' ', '_', $fieldTitle) . '">';
+        $upload_button .= ucwords(str_replace('_', ' ', $fieldTitle));
         $upload_button .= '</label>';
         $upload_button .= '</th>';
         $upload_button .= '<td>';
-        $upload_button .= '<!-- upload field ' . $fieldname . '_input -->';
-        $upload_button .= '<input id="' . str_replace(' ', '_', $fieldname) . '"';
+        $upload_button .= '<!-- upload field ' . $fieldTitle . '_input -->';
+        $upload_button .= '<input id="' . str_replace(' ', '_', $fieldTitle) . '"';
         $upload_button .= 'type="' . $type . '" class="button"';
         $upload_button .= 'value="' . $val . '" />';
-        $upload_button .= '<p class="description" id="' . str_replace(' ', '-', $fieldname) . '-description">';
-        $upload_button .= strtolower(str_replace('_', ' ', $fieldname));
+        $upload_button .= '<p class="description" id="' . str_replace(' ', '-', $fieldTitle) . '-description">';
+        $upload_button .= strtolower(str_replace('_', ' ', $fieldTitle));
         $upload_button .= '</p>';
         $upload_button .= '</td>';
         $upload_button .= '</tr>';
-        $upload_button .= '<!-- input field ' . $fieldname . '_input -->';
+        $upload_button .= '<!-- input field ' . $fieldTitle . '_input -->';
 
         return $upload_button;
     }
@@ -826,13 +815,13 @@ class Form
 
         return \sprintf(
             '<tr><!-- grid element %s -->
-				<th></th>
-					<td>
-					    <div id="%s">%s</div>
-						<small style="color:#8c8f94;">double click on any item to delete</small>
-						<input type="hidden" name="%s" id="%s">
-					</td>
-			</tr>',
+                <th></th>
+                    <td>
+                        <div id="%s">%s</div>
+                        <small style="color:#8c8f94;">double click on any item to delete</small>
+                        <input type="hidden" name="%s" id="%s">
+                    </td>
+            </tr>',
             $elem['div_id'],
             $elem['div_id'],
             $imagelist,
@@ -876,20 +865,20 @@ class Form
     /**
      * Generates the HTML for a datalist input field with a dropdown of options.
      *
-     * @param null|array  $options   Optional. The array of options to include in the datalist. Default is an empty array.
-     * @param string      $fieldname Optional. The name of the field for the input. Default is 'name'.
-     * @param null|string $js        Optional. JavaScript to include with the input field. Default is null.
-     * @param bool        $required  Optional. Whether the field is required. Default is false.
+     * @param null|array  $options    Optional. The array of options to include in the datalist. Default is an empty array.
+     * @param string      $fieldTitle Optional. The name of the field for the input. Default is 'name'.
+     * @param null|string $js         Optional. JavaScript to include with the input field. Default is null.
+     * @param bool        $required   Optional. Whether the field is required. Default is false.
      *
      * @return string The generated HTML for the datalist input field.
      */
     public function list(
         ?array $options = [],
-        string $fieldname = 'name',
+        string $fieldTitle = 'name',
         ?string $js = null,
         bool $required = false
     ): string {
-        $fieldname = strtolower($fieldname);
+        $fieldTitle = strtolower($fieldTitle);
 
         // set selected option
         $selected = $this->selected($options);
@@ -903,39 +892,39 @@ class Form
 
         return \sprintf(
             '<!-- input field %s input -->
-				<tr class="input-%s"><th>
-					<label for="%s">%s</label>
-				</th>
-					<td>
-					<input style="padding: 8px 4px 8px 8px;" list="%s" id="%s" name="%s" />
+                <tr class="input-%s"><th>
+                    <label for="%s">%s</label>
+                </th>
+                    <td>
+                    <input style="padding: 8px 4px 8px 8px;" list="%s" id="%s" name="%s" />
 
-					<datalist id="%s">
-						%s
-					</datalist>
-						<p class="description" id="%s">%s %s</p>
-					</td>
-				</tr>',
-            $fieldname,
+                    <datalist id="%s">
+                        %s
+                    </datalist>
+                        <p class="description" id="%s">%s %s</p>
+                    </td>
+                </tr>',
+            $fieldTitle,
             // <!-- comment.
-            str_replace(' ', '-', $fieldname),
+            str_replace(' ', '-', $fieldTitle),
             // class.
-            str_replace(' ', '_', $fieldname),
+            str_replace(' ', '_', $fieldTitle),
             // for label.
-            ucwords(str_replace('_', ' ', $fieldname)),
+            ucwords(str_replace('_', ' ', $fieldTitle)),
             // label.
-            str_replace(' ', '-', $fieldname),
+            str_replace(' ', '-', $fieldTitle),
             // list.
-            str_replace(' ', '-', $fieldname . '-choice'),
+            str_replace(' ', '-', $fieldTitle . '-choice'),
             // input id.
-            str_replace(' ', '-', $fieldname . '-choice'),
+            str_replace(' ', '-', $fieldTitle . '-choice'),
             // input name.
-            str_replace(' ', '-', $fieldname),
+            str_replace(' ', '-', $fieldTitle),
             // datalist id.
             $selects,
             // options in list.
-            str_replace(' ', '-', $fieldname),
+            str_replace(' ', '-', $fieldTitle),
             // <p> id
-            strtolower(str_replace('_', ' ', $fieldname)),
+            strtolower(str_replace('_', ' ', $fieldTitle)),
             // <p> content.
             $this->isDescription($required)
             // <p> required text.
@@ -977,14 +966,14 @@ class Form
      * Secondly, `sanitize_key` is used to sanitize the string for use as a key, which involves
      * lowercasing and removing characters that are not alphanumeric or dashes.s
      *
-     * @param string $fieldname The field name to be sanitized.
+     * @param string $fieldTitle The field name to be sanitized.
      *
      * @return string Returns the sanitized version of the field name suitable for use as a key or file name.
      */
-    public function sanitize(string $fieldname, bool $use_dashes = false): string
+    public function sanitize(string $fieldTitle, bool $use_dashes = false): string
     {
         $field_id = sanitize_key(
-            sanitize_file_name($fieldname)
+            sanitize_file_name($fieldTitle)
         );
 
         if ($use_dashes) {
@@ -997,21 +986,21 @@ class Form
     /**
      * Generates the HTML for a category selection dropdown within a table row.
      *
-     * @param null|string $fieldname Optional. The name of the field to use in the dropdown. Default is null.
-     * @param array       $args      Optional. Additional arguments to customize the dropdown. Default is an empty array.
+     * @param null|string $fieldTitle Optional. The name of the field to use in the dropdown. Default is null.
+     * @param array       $args       Optional. Additional arguments to customize the dropdown. Default is an empty array.
      *
      * @return string The generated HTML for the category dropdown field.
      */
-    public function categorylist($fieldname = null, $args = []): string
+    public function categorylist($fieldTitle = null, $args = []): string
     {
         return \sprintf(
             '<!-- input select field %s -->
-			<tr class="input-select">
-			<th><label for="select_dropdown">Select a Category</label></th>
-			<td> %s </td>
-			</tr>',
-            $fieldname,
-            wp_dropdown_categories($this->categoryOptions($fieldname, $args))
+            <tr class="input-select">
+            <th><label for="select_dropdown">Select a Category</label></th>
+            <td> %s </td>
+            </tr>',
+            $fieldTitle,
+            wp_dropdown_categories($this->categoryOptions($fieldTitle, $args))
         );
     }
 
@@ -1025,14 +1014,109 @@ class Form
     public function createCategory(string $class = ''): void
     {
         ?><tr class="input-create-category <?php echo esc_attr($class); ?>"><th>
-				<label for="create_category">Create Category</label>
-			</th>
-				<td>
-					<input type="text" name="create_category" id="create_category" aria-describedby="create-category" value=" " class="hidden-cls">
-				<p class="description" id="create-category">create category</p>
-			</td>
-		</tr>
-		<?php
+                <label for="create_category">Create Category</label>
+            </th>
+                <td>
+                    <input type="text" name="create_category" id="create_category" aria-describedby="create-category" value=" " class="hidden-cls">
+                <p class="description" id="create-category">create category</p>
+            </td>
+        </tr>
+        <?php
+    }
+
+    /**
+     * Outputs an HTML spinner with accompanying CSS for a rotating animation.
+     *
+     * @param array $size An optional array to customize the spinner's size.
+     *                    The first element is used for both width and height if only one value is provided.
+     *                    If two values are provided, the first is the width and the second is the height.
+     *
+     * @return void
+     */
+    protected function spinner(array $size = []): void
+    {
+        // Assign default size values
+        $width  = $size[0] ?? '60px';
+        $height = $size[1] ?? $width;
+        // Use the same value for height if only one size is provided
+
+        ?>
+        <div class="spinner"></div>
+
+        <style>
+            .spinner {
+                width: <?php echo htmlspecialchars($width); ?>;
+                height: <?php echo htmlspecialchars($height); ?>;
+                border: 6px solid #000; /* Black border */
+                border-top-color: #ff0000; /* Red top border */
+                border-radius: 50%;
+                animation: spin 0.8s linear infinite;
+                margin: 100px auto;
+            }
+
+            @keyframes spin {
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+        </style>
+        <?php
+    }
+
+    protected function getParams(array $args): array
+    {
+        return array_merge(
+            [
+                'name' => null,
+                'required' => false,
+                'filter'   => 'sanitize_text_field',
+                'class'    => 'uk-input form-control',
+                'type'     => 'text',
+                'button'   => null,
+                'hidden'   => false,
+                'disabled' => false,
+                'info'     => false,
+                'width'    => '200',
+                'js'      => '',
+                'icon'    => 'dashicons-arrow-right',
+            ],
+            $args,
+        );
+    }
+
+    /**
+     * Renders a basic version of the WordPress editor.
+     *
+     * @param string $content   Optional. The initial content for the editor. Default is an empty string.
+     * @param string $editor_id Optional. The ID for the editor instance. Default is 'new_editor'.
+     * @param array  $options   Optional. Additional settings for the editor. Default includes:
+     *                          - 'media_buttons' => false
+     *                          - 'quicktags'     => false
+     *                          - 'tinymce'       => Custom toolbar configuration.
+     *
+     * @return false|string The rendered HTML for the editor, or false on failure.
+     *
+     * @see https://developer.wordpress.org/reference/functions/wp_editor/
+     * @see https://developer.wordpress.org/reference/classes/_wp_editors/parse_settings/
+     */
+    protected function wpeditor($content = '', $editor_id = 'new_editor', $options = [])
+    {
+        ob_start();
+        $args = array_merge(
+            [
+                'media_buttons' => false,
+                'quicktags'     => false,
+                'tinymce'       => [
+                    'toolbar1' => 'bold,italic,underline,separator,alignleft,aligncenter,alignright,separator,bullist,numlist,outdent,indent,blockquote,link,unlink,undo,redo',
+                    'toolbar2' => '',
+                    'toolbar3' => '',
+                ],
+            ],
+            $options
+        );
+        wp_editor($content, $editor_id, $args);
+
+        return ob_get_clean();
     }
 
     /**
@@ -1125,12 +1209,12 @@ class Form
     /**
      * Generates the default options for a category dropdown field.
      *
-     * @param string $fieldname The name of the field to be used in the dropdown attributes.
-     * @param array  $args      Additional arguments to customize the options (not currently used).
+     * @param string $fieldTitle The name of the field to be used in the dropdown attributes.
+     * @param array  $args       Additional arguments to customize the options (not currently used).
      *
      * @return array An array of default options for rendering a category dropdown.
      */
-    protected function categoryOptions(string $fieldname, array $args): array
+    protected function categoryOptions(string $fieldTitle, array $args): array
     {
         return [
             'show_option_all'   => '',
@@ -1145,7 +1229,7 @@ class Form
             'echo'              => 0,
             'selected'          => 0,
             'hierarchical'      => 0,
-            'name'              => strtolower(str_replace(' ', '_', $fieldname)) . 'set_category',
+            'name'              => strtolower(str_replace(' ', '_', $fieldTitle)) . 'set_category',
             'id'                => '',
             'class'             => 'uk-select',
             'depth'             => 0,
@@ -1154,6 +1238,42 @@ class Form
             'hide_if_empty'     => false,
             'value_field'       => 'term_id',
         ];
+    }
+
+    protected static function get(string $fieldKey, ?callable $filter = null): ?array
+    {
+        if (\is_null($filter)) {
+            $filter = 'sanitize_text_field';
+        }
+
+        if (\array_key_exists($fieldKey, $_POST)) {
+            $fieldValue = $_POST[$fieldKey];
+
+            if (\is_callable($filter)) {
+                return [$fieldKey => $filter($fieldValue)];
+            }
+
+            trigger_error('Provided filter is not callable', E_USER_WARNING);
+        }
+
+        return [$fieldKey => null];
+    }
+
+    /**
+     * Validate required parameters for the specified field.
+     *
+     * @param array $requiredKeys The keys that must be present in $params.
+     * @param array $params       The parameters to validate.
+     *
+     * @throws InvalidArgumentException If a required key is missing.
+     */
+    private function validateParams(array $requiredKeys, array $params): void
+    {
+        foreach ($requiredKeys as $key) {
+            if ( ! \array_key_exists($key, $params)) {
+                throw new InvalidArgumentException(\sprintf('The parameter "%s" is required.', $key));
+            }
+        }
     }
 
     /**
@@ -1169,92 +1289,92 @@ class Form
     private function spinnerStyle($css = []): void
     {
         ?>
-		<style media="screen">
-		.loading {
-			padding: <?php echo $css['padding']; ?>;
-			padding-bottom: <?php echo $css['padding-bottom']; ?>;
-		}
-		.loader {
-		width:<?php echo $css['size']; ?>;
-		height: <?php echo $css['size']; ?>;
-		border-radius: 200px;
-		position: relative;
-		animation: rotate 0.8s steps(12, end) infinite;
-		}
-		.loader .prong {
-		position: absolute;
-		height: 50%;
-		width: 16px;
-		left: calc(50% - 8px);
-		transform-origin: bottom;
-		}
-		.loader .prong .inner {
-		background: #34657f;
-		border-radius: 12px;
-		position: absolute;
-		width: 100%;
-		top: 0;
-		height: 50%;
-		}
-		.loader .prong:nth-of-type(1) {
-		opacity: 0.08;
-		transform: rotate(30deg);
-		}
-		.loader .prong:nth-of-type(2) {
-		opacity: 0.16;
-		transform: rotate(60deg);
-		}
-		.loader .prong:nth-of-type(3) {
-		opacity: 0.24;
-		transform: rotate(90deg);
-		}
-		.loader .prong:nth-of-type(4) {
-		opacity: 0.32;
-		transform: rotate(120deg);
-		}
-		.loader .prong:nth-of-type(5) {
-		opacity: 0.4;
-		transform: rotate(150deg);
-		}
-		.loader .prong:nth-of-type(6) {
-		opacity: 0.48;
-		transform: rotate(180deg);
-		}
-		.loader .prong:nth-of-type(7) {
-		opacity: 0.56;
-		transform: rotate(210deg);
-		}
-		.loader .prong:nth-of-type(8) {
-		opacity: 0.64;
-		transform: rotate(240deg);
-		}
-		.loader .prong:nth-of-type(9) {
-		opacity: 0.72;
-		transform: rotate(270deg);
-		}
-		.loader .prong:nth-of-type(10) {
-		opacity: 0.8;
-		transform: rotate(300deg);
-		}
-		.loader .prong:nth-of-type(11) {
-		opacity: 0.88;
-		transform: rotate(330deg);
-		}
-		.loader .prong:nth-of-type(12) {
-		opacity: 0.96;
-		transform: rotate(360deg);
-		}
+        <style media="screen">
+        .loading {
+            padding: <?php echo $css['padding']; ?>;
+            padding-bottom: <?php echo $css['padding-bottom']; ?>;
+        }
+        .loader {
+        width:<?php echo $css['size']; ?>;
+        height: <?php echo $css['size']; ?>;
+        border-radius: 200px;
+        position: relative;
+        animation: rotate 0.8s steps(12, end) infinite;
+        }
+        .loader .prong {
+        position: absolute;
+        height: 50%;
+        width: 16px;
+        left: calc(50% - 8px);
+        transform-origin: bottom;
+        }
+        .loader .prong .inner {
+        background: #34657f;
+        border-radius: 12px;
+        position: absolute;
+        width: 100%;
+        top: 0;
+        height: 50%;
+        }
+        .loader .prong:nth-of-type(1) {
+        opacity: 0.08;
+        transform: rotate(30deg);
+        }
+        .loader .prong:nth-of-type(2) {
+        opacity: 0.16;
+        transform: rotate(60deg);
+        }
+        .loader .prong:nth-of-type(3) {
+        opacity: 0.24;
+        transform: rotate(90deg);
+        }
+        .loader .prong:nth-of-type(4) {
+        opacity: 0.32;
+        transform: rotate(120deg);
+        }
+        .loader .prong:nth-of-type(5) {
+        opacity: 0.4;
+        transform: rotate(150deg);
+        }
+        .loader .prong:nth-of-type(6) {
+        opacity: 0.48;
+        transform: rotate(180deg);
+        }
+        .loader .prong:nth-of-type(7) {
+        opacity: 0.56;
+        transform: rotate(210deg);
+        }
+        .loader .prong:nth-of-type(8) {
+        opacity: 0.64;
+        transform: rotate(240deg);
+        }
+        .loader .prong:nth-of-type(9) {
+        opacity: 0.72;
+        transform: rotate(270deg);
+        }
+        .loader .prong:nth-of-type(10) {
+        opacity: 0.8;
+        transform: rotate(300deg);
+        }
+        .loader .prong:nth-of-type(11) {
+        opacity: 0.88;
+        transform: rotate(330deg);
+        }
+        .loader .prong:nth-of-type(12) {
+        opacity: 0.96;
+        transform: rotate(360deg);
+        }
 
-		@keyframes rotate {
-		from {
-			transform: rotate(0deg);
-		}
-		to {
-			transform: rotate(360deg);
-		}
-		}
-		</style>
-		<?php
+        @keyframes rotate {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+        }
+        </style>
+        <?php
     }
 
     /**

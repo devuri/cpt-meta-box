@@ -1,16 +1,12 @@
-
-
-
-
 <?php
 
+use Urisoft\PostMeta\Data;
+use Urisoft\PostMeta\MetaBox;
 use Urisoft\PostMeta\PostType;
 use Urisoft\PostMeta\Settings;
-use Urisoft\PostMeta\MetaBox;
-use Urisoft\PostMeta\Data;
 
 /**
- * Plugin Name:       Vehicle Management
+ * Plugin Name:       Vehicle Management v1 (manual return data and autosave)
  * Plugin URI:        https://example.com/plugins
  * Description:       An example plugin using the `cpt-meta` library to manage vehicles in WordPress.
  * Version:           1.0
@@ -43,7 +39,6 @@ class VehicleSettings extends Settings
 {
     public function settings(): void
     {
-		dump($this->getMeta());
         echo self::form()->input('Vehicle Name', $this->getMeta('vehicle_name'), [
             'placeholder' => 'Enter the vehicle name',
         ]);
@@ -71,7 +66,7 @@ class VehicleSettings extends Settings
             'vehicle_name' => sanitize_text_field($postData['vehicle_name']),
             'description' => sanitize_textarea_field($postData['description_textarea']),
             'type' => sanitize_text_field($postData['type']),
-            'top_speed' => intval($postData['top_speed']),
+            'top_speed' => intval($postData['top_speed_mph']),
             'is_electric' => !empty($postData['is_electric']),
             'colours' => sanitize_text_field($postData['colours']),
         ];
