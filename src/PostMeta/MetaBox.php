@@ -68,7 +68,7 @@ class MetaBox
         add_action('add_meta_boxes', [$this, 'createMetaBox']);
 
         if ($withSavePost) {
-            add_action('save_post', [$this, 'saveMeta']);
+            add_action('save_post_' . $this->postType, [$this, 'saveMeta']);
         }
 
         return $this;
@@ -175,6 +175,9 @@ class MetaBox
 
         do_action('cpm_before_meta_update', $this->metaData, $post_id, $post, $this->metaContext);
 
+		/**
+		 * This will save array to a single field `metaField`
+		 */
         update_post_meta($post_id, $this->metaField, $this->metaData);
 
         do_action('cpm_after_meta_update', $this->metaData, $post_id, $post, $this->metaContext);
