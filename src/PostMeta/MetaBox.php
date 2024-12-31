@@ -175,9 +175,7 @@ class MetaBox
 
         do_action('cpm_before_meta_update', $this->metaData, $post_id, $post, $this->metaContext);
 
-		/**
-		 * This will save array to a single field `metaField`
-		 */
+        // This will save array to a single field `metaField`
         update_post_meta($post_id, $this->metaField, $this->metaData);
 
         do_action('cpm_after_meta_update', $this->metaData, $post_id, $post, $this->metaContext);

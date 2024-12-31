@@ -22,6 +22,10 @@ interface SettingsInterface
      */
     public function withContext(MetaBox $metaBox): Form;
 
+    public function init(): self;
+
+    public function getForm(): Form;
+
     /**
      * Set up the settings and metadata for a specific post.
      *

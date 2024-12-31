@@ -60,15 +60,15 @@ class VehicleSettings extends Settings
 		]);
     }
 
-    public function data($postData): array
+    public function data(): array
     {
         return [
-            'vehicle_name' => sanitize_text_field($postData['vehicle_name']),
-            'description' => sanitize_textarea_field($postData['description_textarea']),
-            'type' => sanitize_text_field($postData['type']),
-            'top_speed' => intval($postData['top_speed_mph']),
-            'is_electric' => !empty($postData['is_electric']),
-            'colours' => sanitize_text_field($postData['colours']),
+            'vehicle_name' => sanitize_text_field($_POST['vehicle_name']),
+            'description' => sanitize_textarea_field($_POST['description_textarea']),
+            'type' => sanitize_text_field($_POST['type']),
+            'top_speed' => intval($_POST['top_speed_mph']),
+            'is_electric' => !empty($_POST['is_electric']),
+            'colours' => sanitize_text_field($_POST['colours']),
         ];
     }
 }

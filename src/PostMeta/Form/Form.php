@@ -11,6 +11,8 @@
 
 namespace Urisoft\PostMeta\Form;
 
+use InvalidArgumentException;
+
 class Form
 {
     /**
@@ -49,6 +51,11 @@ class Form
         $this->context = $context;
     }
 
+    /**
+     * @param array $context
+     *
+     * @return self
+     */
     public function setContext(array $context = []): self
     {
         $this->context = $context;
@@ -72,12 +79,12 @@ class Form
      * @param array $params {
      *                      Optional. Parameters for the form field. Default empty array.
      *
-     * @var string $field   Required. The type of field to generate. Supported values are
+     * string $field   Required. The type of field to generate. Supported values are
      *             'input', 'textarea', 'select', and 'editor'.
-     * @var string $label   Optional. The label for the form field. Required for all field types.
-     * @var mixed  $val     Optional. The value for the form field. Required for 'input', 'textarea', and 'editor'.
-     * @var array  $options Optional. The options for the 'select' field type. Required for 'select'.
-     * @var string $id      Optional. The ID for the 'editor' field type. Required for 'editor'.
+     * string $label   Optional. The label for the form field. Required for all field types.
+     * mixed  $val     Optional. The value for the form field. Required for 'input', 'textarea', and 'editor'.
+     * array  $options Optional. The options for the 'select' field type. Required for 'select'.
+     * string $id      Optional. The ID for the 'editor' field type. Required for 'editor'.
      *             }
      *
      * @throws InvalidArgumentException If the required 'field' parameter is missing or invalid,
@@ -133,7 +140,7 @@ class Form
      *
      * @param string $fieldTitle Optional. The name of the textarea field. Default is 'name'.
      * @param string $val        Optional. The initial content for the textarea. Default is an empty string.
-     * @param bool   $required   Optional. Whether the field is required. Default is false.
+     * @param array  $args
      *
      * @return string The generated HTML for the textarea field.
      */
@@ -183,13 +190,13 @@ class Form
      *
      * @param string $fieldTitle Optional. The name of the text area field. Default is 'name'.
      * @param string $val        Optional. The initial content for the textarea. Default is an empty string.
-     * @param bool   $required   Optional. Whether the field is required. Default is false.
+     * @param array  $args
      *
      * @return string The generated HTML for the text area field.
      */
-    public function text_area($fieldTitle = 'name', $val = '', $required = false): string
+    public function text_area($fieldTitle = 'name', $val = '', $args = []): string
     {
-        return $this->textarea($fieldTitle, $val, $required);
+        return $this->textarea($fieldTitle, $val, $args);
     }
 
     /**
@@ -395,8 +402,6 @@ class Form
      *
      * @param string $fieldTitle Optional. The name of the field, used for the select's name, ID, and label. Default is 'name'.
      * @param array  $options    Optional. An associative array of options for the select field. Keys are option values, values are labels. Default is an empty array.
-     * @param string $js         Optional. JavaScript function to execute on the onchange event. Default is null.
-     * @param bool   $required   Optional. Whether the field is required. Default is false.
      *
      * @return string The generated HTML markup for the select field.
      */
@@ -1249,6 +1254,7 @@ class Form
         if (\array_key_exists($fieldKey, $_POST)) {
             $fieldValue = $_POST[$fieldKey];
 
+            // @phpstan-ignore-next-line
             if (\is_callable($filter)) {
                 return [$fieldKey => $filter($fieldValue)];
             }

@@ -31,7 +31,7 @@ use Urisoft\PostMeta\Settings;
  *
  * @throws InvalidArgumentException If the post type is not defined in the meta settings.
  *
- * @return bool Returns true if the meta box was successfully registered, false otherwise.
+ * @return MetaBox Returns true if the meta box was successfully registered, false otherwise.
  */
 function createMeta(
     Settings $metaSettings,
@@ -39,7 +39,7 @@ function createMeta(
     ?string $singularName = null,
     ?string $pluralName = null,
     array $postTypeOptions = []
-) {
+): MetaBox {
     if ( ! $metaSettings->getPostType()) {
         throw new InvalidArgumentException('Post type is required in meta settings.');
     }

@@ -187,7 +187,6 @@ class PostType
             'set_featured_image' => "Set featured image",
             'remove_featured_image' => "Remove featured image",
             'use_featured_image' => "Use as featured image",
-            'menu_name' => $pluralName,
             'filter_items_list' => "Filter $pluralName list",
             'items_list_navigation' => "$pluralName list navigation",
             'items_list' => "$pluralName list",

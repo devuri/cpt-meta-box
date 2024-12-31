@@ -70,7 +70,7 @@ abstract class Settings implements SettingsInterface
         $this->postType = $postType;
 
         if ( ! \is_null($context)) {
-            $this->form = self::form($context);
+            $this->form = self::setForm($context);
         } else {
             $this->form = self::setForm(
                 [
