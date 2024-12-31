@@ -1,144 +1,247 @@
 # Input Fields in the `input` Method
 
-The `input` method is a customizable way to generate HTML input fields with various optional parameters and features. Below is a guide to the possible input fields and configurations.
+The `input` method provides a flexible way to generate HTML `<input>` fields, each wrapped in a table row (`<tr>`) for easy layout within the WordPress admin or other UIs. It accepts various parameters to customize the input field’s behavior, styling, and additional elements such as a submit button.
+
+
+
+## Method Signature
+
+```php
+public function input(
+    string $fieldTitle = 'item name',
+    string $val = '',
+    array $args = []
+): string
+```
+
+- **`$fieldTitle`**: The user-facing label for the field, also used to generate the `name` and `id` attributes.  
+- **`$val`**: The default value that appears in the `<input>` tag.  
+- **`$args`**: An associative array of options to customize the input’s behavior, styling, or additional features.
+
+
 
 ## Parameters Overview
 
+Below is a breakdown of each parameter and how it affects the generated HTML.
+
 ### **1. `$fieldTitle`**
 - **Type:** `string`
-- **Description:** The name of the field, defaulting to `'item name'`.
-- **Details:**
-  - It is sanitized into two forms:
-    - Hyphenated format for general usage (`item-name`).
-    - Underscored format for the field ID (`item_name`).
-  - Used as both the label and the `name` attribute of the input field.
-- **Example:**
-  - Input: `Product Name`
-  - Sanitized Field Name: `product-name`
-  - Sanitized Field ID: `product_name`
+- **Default:** `'item name'`
+- **Description:**  
+  - Serves as both the visible label (`<label>`) and the name/id of the input.  
+  - Automatically sanitized into two forms:
+    - Hyphenated for CSS classes (e.g., `item-name`)  
+    - Underscored for the field’s ID (e.g., `item_name`)  
 
----
+**Example**:  
+```php
+$this->input('Product Name');
+```
+Generates an ID like `product_name` and a class reference `input-product-name`.
+
+
 
 ### **2. `$val`**
 - **Type:** `string`
-- **Description:** The default value of the input field.
-- **Example:**
-  - If `$val = '123'`, the input field's initial value will be `123`.
+- **Default:** `''` (empty string)
+- **Description:**  
+  - Determines the `<input>` element’s initial `value` attribute.
 
----
+**Example**:  
+```php
+$this->input('Quantity', '5');
+```
+Produces an `<input value="5">` by default.
+
+
 
 ### **3. `$args`**
 - **Type:** `array`
-- **Description:** An optional array of additional parameters to customize the input field.
-- **Supported Keys:**
+- **Default:** `[]`
+- **Description:**  
+  - Allows advanced customization of the field.  
+  - Each key modifies a specific behavior or attribute.
+
+The following keys are supported:
 
 #### **`required`**
 - **Type:** `bool`
-- **Description:** If `true`, the input field will be marked as required.
 - **Default:** `false`
-- **Effect:** Adds the `required` attribute to the `<input>` element.
+- **Description:**
+  - Adds an HTML `required` attribute to the `<input>`.
+  - Typically used for validation when submitting forms.
 
----
+**Example**:  
+```php
+['required' => true]
+```
+Produces `<input required>`.
+
+
 
 #### **`class`**
 - **Type:** `string`
-- **Description:** Adds custom CSS classes to the input field.
-- **Example:**
-  - Input: `custom-class another-class`
-  - Result: `<input class="custom-class another-class">`
+- **Default:** `'uk-input form-control'` (or similar, depending on defaults)
+- **Description:**  
+  - Adds one or more CSS classes to the input element for styling.
 
----
+**Example**:  
+```php
+['class' => 'custom-input large-input']
+```
+Generates `<input class="custom-input large-input">`.
+
+
 
 #### **`type`**
 - **Type:** `string`
-- **Description:** Specifies the type of the input field. Examples include:
-  - `text` (default)
-  - `email`
-  - `password`
-  - `number`
-  - `hidden`
+- **Default:** `'text'`
+- **Description:**  
+  - Sets the HTML input type, such as `text`, `email`, `password`, `number`, `search`, or `hidden`.
 
----
+**Example**:  
+```php
+['type' => 'email']
+```
+Creates `<input type="email">`.
+
+
 
 #### **`button`**
 - **Type:** `string`
-- **Description:** If set, a submit button with the given label will be added.
-- **Example:**
-  - Input: `'Submit'`
-  - Result: A submit button labeled "Submit" will appear next to the input field.
+- **Default:** `null`
+- **Description:**  
+  - If defined, a `<button type="submit">` is rendered in a separate `<td>` next to the input field with the given label text.
 
----
+**Example**:  
+```php
+['button' => 'Search']
+```
+Generates a “Search” submit button alongside the input.
+
+
 
 #### **`hidden`**
 - **Type:** `bool`
-- **Description:** If `true`, hides the input field.
-- **Effect:** Adds the `hidden` attribute to the `<input>` element.
+- **Default:** `false`
+- **Description:**  
+  - If `true`, adds a `hidden` attribute to the `<input>` field.
 
----
+**Note**:  
+Usually, for an actual hidden field, you would set `type => 'hidden'`. This parameter can be used for consistency with other attribute toggles.
+
+
 
 #### **`disabled`**
 - **Type:** `bool`
-- **Description:** If `true`, disables the input field.
-- **Effect:** Adds the `disabled` attribute to the `<input>` element.
+- **Default:** `false`
+- **Description:**  
+  - If `true`, adds a `disabled` attribute, preventing user interaction.
 
----
+**Example**:  
+```php
+['disabled' => true]
+```
+Produces `<input disabled>`.
+
+
 
 #### **`info`**
 - **Type:** `bool|string`
-- **Description:** Provides additional information or instructions for the input field.
-- **Behavior:**
-  - If a string is provided, it is displayed as a descriptive `<p>` tag under the input field.
+- **Default:** `false`
+- **Description:**  
+  - If a string is provided, that text is rendered below the input field in a `<p>` tag.  
+  - If `true`, a descriptive indicator (e.g., “Required”) may be shown, depending on your implementation.
 
----
+**Example**:  
+```php
+['info' => 'Enter a valid email address.']
+```
+Outputs `<p class="description">Enter a valid email address.</p>` below the field.
+
+
 
 #### **`width`**
 - **Type:** `string`
-- **Description:** Specifies the width of the `<td>` containing the input field.
-- **Example:**
-  - Input: `'50%'`
-  - Result: `<td width="50%">`
+- **Default:** `''` (empty, meaning no width specified)
+- **Description:**  
+  - Sets the `width` attribute on the `<td>` wrapper. Can be a percentage or pixel value.
 
----
+**Example**:  
+```php
+['width' => '50%']
+```
+Generates `<td width="50%">`.
 
-## Input Field Construction
 
-### **Generated HTML**
-The function generates the following HTML structure:
+
+#### **`icon`**
+- **Type:** `string`
+- **Default:** `dashicons-arrow-right`
+- **Description:**  
+  - Displays a [Dashicon](https://developer.wordpress.org/resource/dashicons/) to the left of the input label.  
+  - You can specify any Dashicon class name (e.g., `dashicons-admin-users`, `dashicons-search`).
+
+**Example**:  
+```php
+['icon' => 'dashicons-admin-users']
+```
+Yields `<span class="dashicons dashicons-admin-users"></span>`.
+
+
+
+## Generated HTML Structure
+
+Given the parameters above, here is a representative structure for the output:
+
 ```html
-<tr class="input-item-name">
+<tr class="input-[hyphenated-fieldTitle]">
     <th>
         <span class="dashicons [icon-class]"></span>
-        <label for="item_name">Item Name</label>
+        <label for="[underscored_fieldTitle]">
+            [Formatted Field Title]
+        </label>
     </th>
     <td width="[width]">
         <input
             type="[type]"
-            name="[field_name]"
-            id="[field_id]"
-            aria-describedby="[aria-description]"
-            value="[value]"
-            class="[classes]"
-            [required|disabled]
+            name="[underscored_fieldTitle]"
+            id="[underscored_fieldTitle]"
+            aria-describedby="[hyphenated-fieldTitle]"
+            value="[val]"
+            class="[class]"
+            [required|disabled|hidden...]
         >
-        <p class="description" id="[description-id]">[description-content]</p>
+        <p class="description" id="[underscored_fieldTitle]">
+            [info text if provided]
+        </p>
     </td>
     <td>
-        [submit-button]
+        [Optional Submit Button if 'button' => 'Search' or similar]
         <p class="description" style="visibility: hidden;">...</p>
     </td>
 </tr>
 ```
 
+- **`class="input-[hyphenated-fieldTitle]"`**: Helps identify rows for styling.  
+- **`<th>`** element includes the optional Dashicon plus a `<label>` referencing the `id`.  
+- **`<td width="[width]"`** sets a custom width if provided.  
+- **`aria-describedby="[hyphenated-fieldTitle]"`** ties the field to its description for screen readers.  
+
+
 
 ## Accessibility
 
-- **`aria-describedby`:** Associates the input field with a description paragraph for screen readers.
-- **Descriptive Labels:** Ensures all inputs have an associated `<label>` for accessibility.
+- Each `<input>` is wrapped with a corresponding `<label>` for.  
+- `aria-describedby` associates screen readers with the `<p class="description">`.  
+- Ensures that all form fields are labeled and accessible for assistive technologies.
 
 
-## Examples
 
-### **Basic Input Field**
+## Usage Examples
+
+### **1. Basic Input Field**
+
 ```php
 $this->input('Username', '', [
     'type' => 'text',
@@ -149,10 +252,11 @@ $this->input('Username', '', [
 ```
 
 **Generated HTML:**
+
 ```html
 <tr class="input-username">
     <th>
-        <span class="dashicons"></span>
+        <span class="dashicons dashicons-arrow-right"></span>
         <label for="username">Username</label>
     </th>
     <td width="">
@@ -165,7 +269,10 @@ $this->input('Username', '', [
 </tr>
 ```
 
-### **Input Field with Submit Button**
+
+
+### **2. Input Field with Submit Button**
+
 ```php
 $this->input('Search', '', [
     'type' => 'search',
@@ -174,10 +281,11 @@ $this->input('Search', '', [
 ```
 
 **Generated HTML:**
+
 ```html
 <tr class="input-search">
     <th>
-        <span class="dashicons"></span>
+        <span class="dashicons dashicons-arrow-right"></span>
         <label for="search">Search</label>
     </th>
     <td width="">
@@ -192,39 +300,9 @@ $this->input('Search', '', [
 ```
 
 
-## Examples Fields in the `input` Method
 
-Here are some additional fields using the `input` method with various input types and configurations:
+### **3. Email Input (Required)**
 
-### **Text Input with Default Value**
-```php
-$this->input('Full Name', 'John Doe', [
-    'type' => 'text',
-    'class' => 'full-name-input',
-    'info' => 'Please enter your full name.'
-]);
-```
-
-**Generated HTML:**
-```html
-<tr class="input-full-name">
-    <th>
-        <span class="dashicons"></span>
-        <label for="full_name">Full Name</label>
-    </th>
-    <td width="">
-        <input type="text" name="full_name" id="full_name" aria-describedby="full_name" value="John Doe" class="full-name-input">
-        <p class="description" id="full_name">Please enter your full name.</p>
-    </td>
-    <td>
-        <p class="description" style="visibility: hidden;">...</p>
-    </td>
-</tr>
-```
-
----
-
-### **Email Input with Required Field**
 ```php
 $this->input('Email Address', '', [
     'type' => 'email',
@@ -235,10 +313,11 @@ $this->input('Email Address', '', [
 ```
 
 **Generated HTML:**
+
 ```html
 <tr class="input-email-address">
     <th>
-        <span class="dashicons"></span>
+        <span class="dashicons dashicons-arrow-right"></span>
         <label for="email_address">Email Address</label>
     </th>
     <td width="">
@@ -251,77 +330,25 @@ $this->input('Email Address', '', [
 </tr>
 ```
 
----
 
-### **Password Input**
-```php
-$this->input('Password', '', [
-    'type' => 'password',
-    'class' => 'password-input',
-    'info' => 'Create a strong password for security.',
-]);
-```
 
-**Generated HTML:**
-```html
-<tr class="input-password">
-    <th>
-        <span class="dashicons"></span>
-        <label for="password">Password</label>
-    </th>
-    <td width="">
-        <input type="password" name="password" id="password" aria-describedby="password" value="" class="password-input">
-        <p class="description" id="password">Create a strong password for security.</p>
-    </td>
-    <td>
-        <p class="description" style="visibility: hidden;">...</p>
-    </td>
-</tr>
-```
+### **4. Number Input with Custom Width**
 
----
-
-### **Hidden Input**
-```php
-$this->input('Token', '123456789', [
-    'type' => 'hidden'
-]);
-```
-
-**Generated HTML:**
-```html
-<tr class="input-token">
-    <th>
-        <span class="dashicons"></span>
-        <label for="token">Token</label>
-    </th>
-    <td width="">
-        <input type="hidden" name="token" id="token" aria-describedby="token" value="123456789">
-        <p class="description" id="token" style="visibility: hidden;">...</p>
-    </td>
-    <td>
-        <p class="description" style="visibility: hidden;">...</p>
-    </td>
-</tr>
-```
-
----
-
-### **Number Input with Width**
 ```php
 $this->input('Quantity', '1', [
     'type' => 'number',
     'class' => 'quantity-input',
-    'info' => 'Enter the quantity.',
+    'info'  => 'Enter the quantity.',
     'width' => '50%'
 ]);
 ```
 
 **Generated HTML:**
+
 ```html
 <tr class="input-quantity">
     <th>
-        <span class="dashicons"></span>
+        <span class="dashicons dashicons-arrow-right"></span>
         <label for="quantity">Quantity</label>
     </th>
     <td width="50%">
@@ -334,39 +361,10 @@ $this->input('Quantity', '1', [
 </tr>
 ```
 
----
 
-### **Search Input with Button**
-```php
-$this->input('Search Products', '', [
-    'type' => 'search',
-    'class' => 'search-input',
-    'button' => 'Search',
-    'info' => 'Search for products by name or SKU.',
-]);
-```
 
-**Generated HTML:**
-```html
-<tr class="input-search-products">
-    <th>
-        <span class="dashicons"></span>
-        <label for="search_products">Search Products</label>
-    </th>
-    <td width="">
-        <input type="search" name="search_products" id="search_products" aria-describedby="search_products" value="" class="search-input">
-        <p class="description" id="search_products">Search for products by name or SKU.</p>
-    </td>
-    <td>
-        <button type="submit">Search</button>
-        <p class="description" style="visibility: hidden;">...</p>
-    </td>
-</tr>
-```
+### **5. Disabled Input Field**
 
----
-
-### **Disabled Input Field**
 ```php
 $this->input('Read Only Value', '42', [
     'type' => 'text',
@@ -376,14 +374,15 @@ $this->input('Read Only Value', '42', [
 ```
 
 **Generated HTML:**
+
 ```html
 <tr class="input-read-only-value">
     <th>
-        <span class="dashicons"></span>
+        <span class="dashicons dashicons-arrow-right"></span>
         <label for="read_only_value">Read Only Value</label>
     </th>
     <td width="">
-        <input type="text" name="read_only_value" id="read_only_value" aria-describedby="read_only_value" value="42" class="" disabled>
+        <input type="text" name="read_only_value" id="read_only_value" aria-describedby="read_only_value" value="42" disabled>
         <p class="description" id="read_only_value">This field is not editable.</p>
     </td>
     <td>
@@ -392,9 +391,10 @@ $this->input('Read Only Value', '42', [
 </tr>
 ```
 
----
 
-### **Custom Dashicon with Class**
+
+### **6. Input Field with a Custom Dashicon**
+
 ```php
 $this->input('Username', '', [
     'type' => 'text',
@@ -405,6 +405,7 @@ $this->input('Username', '', [
 ```
 
 **Generated HTML:**
+
 ```html
 <tr class="input-username">
     <th>
@@ -420,3 +421,16 @@ $this->input('Username', '', [
     </td>
 </tr>
 ```
+
+
+
+## Summary
+
+The **`input`** method offers a highly customizable approach to generating `<input>` fields within an HTML table layout. By adjusting the `type`, classes, and optional parameters in `$args`, you can create a wide range of fields—from simple text inputs to specialized email, password, number, or search fields—complete with optional descriptive texts, submit buttons, and Dashicons.
+
+1. **Accessibility**: Each generated field includes a matching `<label>` and `aria-describedby` attribute for better assistive technology support.  
+2. **Styling & Layout**: Table-based rendering with optional custom widths and classes makes it easy to align multiple fields.  
+3. **Validation & UX**: The `required` and `disabled` flags help enforce user input constraints and disable fields when necessary.  
+4. **Additional Features**: A built-in option for generating a submit button in the same row, and easy-to-add descriptive text (`info`) for inline instructions.
+
+Use these examples as a reference for integrating the `input` method in your plugin or theme to create well-structured and user-friendly admin forms.

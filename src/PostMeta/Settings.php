@@ -139,8 +139,7 @@ abstract class Settings implements SettingsInterface
         //     'placeholder' => 'Enter the vehicle name',
         // ]);
 
-        // always return context.
-        return $this;
+        return;
     }
 
     public function withContext(MetaBox $metaBox): Form

@@ -1,207 +1,287 @@
-The `cpt-meta` library is a powerful package for managing WordPress custom post types, meta boxes, and custom fields. It simplifies the creation of structured content management systems by providing tools for defining, rendering, and saving metadata, all while integrating seamlessly with WordPress hooks and the REST API.
+# cpt-meta Library
+
+The **`cpt-meta`** library simplifies the creation, management, and rendering of custom post types, meta boxes, and fields in WordPress. Its modular design makes it easier to build structured content management solutions by providing intuitive APIs for defining and sanitizing metadata, registering post types, generating custom fields, and interacting with WordPress hooks and REST endpoints.
+
 
 
 ## Installation
 
-Install the library via Composer:
+Install via Composer:
 
-```shell
+```bash
 composer require devuri/cpt-meta-box
 ```
 
----
+Once installed, ensure that your plugin or theme autoloads dependencies:
 
-## Features
+```php
+require_once __DIR__ . '/vendor/autoload.php';
+```
 
-- **Custom Post Types**: Easily create and manage WordPress custom post types.
-- **Meta Boxes and Fields**: Define and manage meta boxes and custom fields with ease.
-- **Metadata Retrieval**: Use the `Data` class to fetch and manage metadata programmatically.
-- **Customizable Settings**: Extend the `Settings` class to define fields and sanitize data.
-- **REST API Integration**: Extend WordPress REST API with custom endpoints.
-- **Dynamic Field Rendering**: Render input fields, select boxes, checkboxes, and more using the `Form` helper.
-- **Admin Column Customization**: Add sortable and custom columns in the WordPress admin.
 
----
 
-## Example Use Case: Vehicle Management System
+## Key Features
 
-This library can be used to create a **Vehicle Management System**, where administrators manage vehicles with metadata such as name, description, type, specifications, and more.
+- **Custom Post Types**  
+  Easily register and configure custom post types using the `PostType` class.
 
----
+- **Meta Boxes and Fields**  
+  Define and manage meta boxes via the `MetaBox` class, and create custom field definitions with the `Settings` class.
 
-## Example Usage
+- **Form Rendering**  
+  Leverage the `Form` class to generate input fields, textareas, selects, color pickers, and more—complete with zebra striping, table-based layouts, and built-in sanitization hooks.
 
-### Registering a Custom Post Type
+- **Metadata Handling**  
+  Retrieve and manage metadata with the `Data` class, which provides easy methods to fetch post meta, create lists of posts, and fetch additional information (like featured image IDs).
 
-Create a custom post type for "Vehicles":
+- **REST API Integration**  
+  The `PostType` class can register custom REST endpoints for retrieving or manipulating data. Extend WordPress’s REST API easily.
+
+- **Admin Columns**  
+  Manage custom columns in the WordPress admin, making them sortable or adding additional information in list tables.
+
+- **Modular & Extensible**  
+  Built around interfaces, traits, and abstract classes to ensure maximum flexibility. You can override default behaviors or hook into key extension points.
+
+
+
+## Example: Vehicle Management
+
+Below is a basic walkthrough on how you might use this library to manage a “Vehicle” custom post type and its metadata.
+
+### 1. Register a Custom Post Type
+
+First, create a `PostType` instance and register it:
 
 ```php
 use Urisoft\PostMeta\PostType;
 
-// Register a "Vehicle" post type
-$vehiclePostType = new PostType('vehicle', 'Vehicle', 'Vehicles',[
-	'menu_icon' => 'dashicons-car',
-	'supports' => ['title', 'thumbnail'],
-]);
+// Create and configure a custom post type: "Vehicle"
+$vehiclePostType = new PostType(
+    'vehicle',       // post type slug
+    'Vehicle',       // singular name
+    'Vehicles',      // plural name
+    [
+        'menu_icon' => 'dashicons-car',
+        'supports'  => ['title', 'thumbnail'],
+    ]
+);
+
+// Register the post type with WordPress
 $vehiclePostType->register();
 ```
 
----
+This will make a new post type called “Vehicle” in the WordPress admin menu with a car dashicon and support for `title` and `thumbnail`.
 
-### Adding Custom Settings
+### 2. Define Metadata Fields in a Settings Class
 
-Extend the `Settings` class to define custom fields for vehicles:
+Next, create a subclass of `Settings` to define the custom fields (e.g., name, description, type, speed):
 
 ```php
 use Urisoft\PostMeta\Settings;
 
 class VehicleSettings extends Settings
 {
-	public function settings(): void
+    /**
+     * Override the settings() method to define your form fields.
+     */
+    public function settings(): void
     {
-        echo self::form()->input('Vehicle Name', $this->getMeta('vehicle_name'), [
+        // Simple text input
+        $this->input('Vehicle Name', [
             'placeholder' => 'Enter the vehicle name',
         ]);
-        echo self::form()->textarea('Description', $this->getMeta('description'));
-		echo self::form()->select([
-            'car' => 'Car',
-            'truck' => 'Truck',
+
+        // Textarea
+        $this->textarea('Description');
+
+        // Select dropdown (car, truck, motorcycle)
+        $this->select('Type', [
+            'car'        => 'Car',
+            'truck'      => 'Truck',
             'motorcycle' => 'Motorcycle',
-            'selected' => $this->getMeta('type'),
-        ],'Type');
-        echo self::form()->input('Top Speed (mph)', $this->getMeta('top_speed'), [
-            'type' => 'number',
+            'selected'   => $this->getMeta('type'), // set currently saved value as selected
+        ]);
+
+        // Number input
+        $this->input('Top Speed (mph)', [
+            'type'        => 'number',
             'placeholder' => 'Enter top speed in mph',
         ]);
-    }
 
-    public function data($post_data): array
-    {
-        return [
-            'vehicle_name' => sanitize_text_field($post_data['vehicle_name']),
-            'description' => sanitize_textarea_field($post_data['description']),
-            'type' => sanitize_text_field($post_data['type']),
-            'top_speed' => intval($post_data['top_speed']),
-            'is_electric' => !empty($post_data['is_electric']),
-        ];
+        // Color field
+        $this->input('Available Colors', [
+            'type'        => 'color',
+            'placeholder' => 'Choose a color',
+        ]);
     }
 }
 ```
 
-### Registering a Meta Box
+Within these methods (`input`, `textarea`, `select`), the library handles rendering, sanitization, and labeling. You can further tailor data sanitization by overriding methods like `data()` or hooking into form submission processes.
 
-Use the `MetaBox` class to register the meta box:
+### 3. Attach the Settings to a Meta Box
+
+Create a `MetaBox` instance, passing in your `VehicleSettings` object and any config options, then register it:
 
 ```php
 use Urisoft\PostMeta\MetaBox;
 
+// Instantiate VehicleSettings for the "vehicle" post type
 $vehicleSettings = new VehicleSettings('vehicle');
 
-(new MetaBox($vehicleSettings, [
-    'name' => 'Vehicle Details',
-    'zebra' => true,
-]))->register();
+// Create a MetaBox for these settings
+$vehicleMetaBox = new MetaBox($vehicleSettings, [
+    'name'  => 'Vehicle Details', // The meta box title in the WP admin
+    'zebra' => true,              // Zebra striping for table rows
+]);
+
+// Register the meta box so it appears in the edit screen
+$vehicleMetaBox->register();
 ```
 
-### Retrieving Saved Metadata
+When editing a “Vehicle” post, you’ll now see a “Vehicle Details” meta box containing all defined fields.
 
-Retrieve metadata for a vehicle using the `Data` class:
+### 4. Retrieving Metadata
+
+With the `Data` class, you can retrieve post data in one place:
 
 ```php
 use Urisoft\PostMeta\Data;
 
-$data = Data::init('vehicle');
-$vehicle_meta = $data->meta($post_id);
+// Initialize a Data instance for "vehicle" post type
+$vehicleData = Data::init('vehicle');
 
-echo 'Vehicle Name: ' . esc_html($vehicle_meta['vehicle_name']);
+// Retrieve meta for a specific Vehicle post (ID=100)
+$info = $vehicleData->meta(100);
+
+// Access custom fields
+echo 'Vehicle Name: ' . esc_html($info['vehicle_name']);
+echo 'Top Speed: ' . esc_html($info['top_speed']) . ' mph';
 ```
+
+Additionally, you can fetch a list of vehicles, generate edit links, or retrieve featured image IDs.
+
+
 
 ## Advanced Usage
 
-### Adding Custom Fields
+### 1. Custom REST Endpoints
 
-Add a color picker field for vehicles:
+If you’d like to expose a custom endpoint, the `PostType` class offers a helper method:
 
 ```php
-echo self::form()->input('Color', $this->get_meta('color'), ['type' => 'color']);
-
-// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/color
+$vehiclePostType->addCustomRestEndpoint('/custom-details', function ($request) {
+    // Do something with $request...
+    return ['message' => 'Custom endpoint data!'];
+}, 'GET');
 ```
 
-### Custom Admin Columns
+Your custom endpoint will be available at `/{post_type}/v1/custom-details`.
 
-Add custom columns to the WordPress admin for the "Vehicle" post type:
+### 2. Admin Columns
+
+Add or modify admin columns for your post type:
 
 ```php
 $vehiclePostType->addAdminColumns(
     function ($columns) {
-        $columns['type'] = 'Type';
+        $columns['type']  = 'Type';
         $columns['speed'] = 'Top Speed';
         return $columns;
     },
     function ($column, $post_id) {
-        if ($column === 'type') {
-            echo get_post_meta($post_id, 'type', true);
-        }
-        if ($column === 'speed') {
-            echo get_post_meta($post_id, 'top_speed', true) . ' mph';
+        switch ($column) {
+            case 'type':
+                echo esc_html(get_post_meta($post_id, 'type', true));
+                break;
+            case 'speed':
+                echo intval(get_post_meta($post_id, 'top_speed', true)) . ' mph';
+                break;
         }
     }
 );
+
+// Make the "Top Speed" column sortable:
+$vehiclePostType->addSortableColumns(['speed' => 'top_speed']);
 ```
 
----
+### 3. Bulk Registration & Autosave
 
-### Adding Sortable Columns
+If you maintain multiple custom post types, you can bulk-register them. Or you can rely on the built-in autosave mechanism (by default, `MetaBox` hooks into `save_post_{$post_type}`).
 
-Make the "Top Speed" column sortable:
+### 4. Extensible Form Rendering
 
-```php
-$vehiclePostType->addSortableColumns([
-    'speed' => 'top_speed',
-]);
-```
+All fields are generated by the `Form` class, which you can override or extend for specialized needs (e.g., custom JavaScript fields, advanced validation, etc.).  
+Common methods include `input`, `textarea`, `select`, `editor`, and more.
 
----
 
-### Filtering Vehicles by Metadata
 
-Retrieve only electric vehicles:
+## Simplified Example
+
+Below is a concise snippet illustrating how a plugin might set everything up:
 
 ```php
-$electric_vehicles = $data->items(-1, [
-    'meta_key' => 'is_electric',
-    'meta_value' => true,
-]);
+/**
+ * Plugin Name: Vehicle Management
+ */
 
-foreach ($electric_vehicles as $vehicle) {
-    $meta = $data->meta($vehicle->ID);
-    echo '<h2>' . esc_html($meta['vehicle_name']) . '</h2>';
+use Urisoft\PostMeta\PostType;
+use Urisoft\PostMeta\Settings;
+use Urisoft\PostMeta\MetaBox;
+
+// 1. Register the post type
+$vehicle = new PostType('vehicle', 'Vehicle', 'Vehicles', [
+    'menu_icon' => 'dashicons-car',
+    'supports'  => ['title', 'thumbnail'],
+]);
+$vehicle->register();
+
+// 2. Define settings fields
+class VehicleSettings extends Settings
+{
+    public function settings()
+    {
+        $this->input('Vehicle Name');
+        $this->textarea('Description');
+        $this->select('Type', [
+            'car'        => 'Car',
+            'truck'      => 'Truck',
+            'motorcycle' => 'Motorcycle',
+            'selected'   => $this->getMeta('type'),
+        ]);
+        $this->input('Top Speed (mph)', ['type' => 'number']);
+    }
 }
+
+// 3. Create a meta box for those settings
+(new MetaBox(new VehicleSettings('vehicle'), [
+    'name'  => 'Vehicle Details',
+    'zebra' => true,
+]))->register();
 ```
 
----
+When you visit the admin area and edit a “Vehicle” post, you’ll see a “Vehicle Details” meta box. The data automatically saves to post meta.
 
-### Adding Custom REST Endpoints
 
-Add a custom REST endpoint for vehicle details:
 
-```php
-$vehiclePostType->addCustomRestEndpoint('/custom-details', function ($data) {
-    return [
-        'message' => 'Custom endpoint data!',
-    ];
-}, 'GET');
-```
+## Additional Tips
 
----
+- **Naming Conventions**:  
+  By default, meta data may be stored in meta keys like `"{post_type}_cpm"` or a hashed field. Check your code or the `Settings` subclass to see how it’s configured.
 
-## Notes
+- **Sanitization & Validation**:  
+  Each field can be sanitized in the `data()` method of your `Settings` subclass. For advanced or non-textual fields (e.g., HTML fields, numeric ranges), override or extend the library’s defaults.
 
-The `cpt-meta` library simplifies WordPress custom post type and metadata management, making it an excellent tool for building content management systems like a Vehicle Management System. Its flexibility and feature-rich architecture make it suitable for developers of all skill levels.
+- **Compatibility**:  
+  The library requires at least PHP 7.4+ and a WordPress environment (version 4.0 or higher is recommended).
 
-For further information, check out WordPress's official documentation:
+- **Documentation**:  
+  Inline PHPDoc comments are provided throughout the source code. You can also refer to WordPress’s official developer references for functions like `get_posts()`, `register_post_type()`, `wp_editor()`, etc.
 
-- [Custom Post Types](https://developer.wordpress.org/plugins/post-types/)
-- [Custom Meta Boxes](https://developer.wordpress.org/plugins/metadata/custom-meta-boxes/)
-- [REST API](https://developer.wordpress.org/rest-api/)
+The **`cpt-meta`** library offers a streamlined, powerful set of tools for building and maintaining custom post types in WordPress. By combining classes like `PostType`, `MetaBox`, `Settings`, `Form`, and `Data`, developers can organize complex metadata workflows with minimal boilerplate. Whether you’re setting up a single custom post type or crafting a fully-fledged content management system, `cpt-meta` aims to simplify the entire process—so you can focus on building great features.
+
+For more advanced details on WordPress custom post types and metadata, refer to:
+- [WordPress Custom Post Type](https://developer.wordpress.org/plugins/post-types/)
+- [WordPress Custom Meta Boxes](https://developer.wordpress.org/plugins/metadata/custom-meta-boxes/)
+- [WordPress REST API](https://developer.wordpress.org/rest-api/)
