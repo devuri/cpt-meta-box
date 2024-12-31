@@ -13,7 +13,7 @@ class MetaBox
 {
     protected ?string $postType;
     protected ?SettingsInterface $settings;
-    protected ?array $data = [];
+    protected ?array $metaData = [];
     protected ?string $metabox;
     protected ?string $metaId;
     protected ?array $args;
@@ -22,6 +22,7 @@ class MetaBox
     protected ?string $metaField;
     protected ?string $groupKey;
     protected ?array $metaContext;
+    protected ?Form $formContext;
 
     /**
      * Constructor to initialize MetaBox.
@@ -32,14 +33,15 @@ class MetaBox
     public function __construct(SettingsInterface $settings, ?array $args = [])
     {
         $this->args = $this->setArgs($args);
-        $this->settings = $settings;
+        $this->settings = $settings->init();
         $this->postType = sanitize_title($settings->getPostType());
 
         // Define meta name and attributes.
         $this->metabox = $this->setName($this->args);
         $this->groupKey = '_' . hash('fnv1a32', $this->metabox);
         $this->metaId = 'cpm-group-' . $this->metabox . $this->groupKey;
-        $this->metaField = $this->metabox . '_cpm';
+        // $this->metaField = $this->metabox . '_cpm';
+        $this->metaField = $this->metabox . $this->groupKey;
         $this->metaLabel = ucfirst(str_replace('-', ' ', $this->metabox));
 
         $this->metaContext = [
@@ -52,12 +54,24 @@ class MetaBox
             'metaField' => $this->metaField,
             'metaLabel' => $this->metaLabel,
         ];
+
+        // set form context
+        $this->formContext = $this->settings->getForm();
     }
 
-    public function register(): void
+    public function register(?PostType $postType = null, bool $withSavePost = true): self
     {
+        if ($postType) {
+            $postType->register();
+        }
+
         add_action('add_meta_boxes', [$this, 'createMetaBox']);
-        add_action('save_post', [$this, 'saveMetaData']);
+
+        if ($withSavePost) {
+            add_action('save_post_' . $this->postType, [$this, 'saveMeta']);
+        }
+
+        return $this;
     }
 
     public function context(): ?array
@@ -113,13 +127,13 @@ class MetaBox
             echo $this->form()->table('open');
 
         try {
-            $this->build($post)->settings();
+            $this->build($post)->withContext($this);
         } catch (Exception $e) {
             echo 'Exception: ' . esc_html($e->getMessage());
         }
 
         echo $this->form()->table('close');
-        $this->form()->nonce();
+        $this->form()->nonce($this->metaId);
         ?>
         </div>
         <?php
@@ -130,7 +144,7 @@ class MetaBox
      *
      * @param int $post_id Post ID.
      */
-    public function saveMetaData(int $post_id): void
+    public function saveMeta(int $post_id): void
     {
         if (\defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
             return;
@@ -146,24 +160,68 @@ class MetaBox
             return;
         }
 
-        if ( ! $this->form()->verifyNonce()) {
+        if ( ! $this->form()->verifyNonce($this->metaId)) {
             return;
         }
 
-        $this->data = $this->settings->data($_POST);
+        // set the meta data.
+        if ( ! empty($this->settings->data())) {
+            $this->metaData = $this->settings->data();
+        } else {
+            $this->metaData = $this->getPostFieldsData();
+        }
 
-        apply_filters($this->metaField, $this->data, $post_id);
+        apply_filters($this->metaField, $this->metaData, $post_id, $this->metaContext);
 
-        do_action('cpm_before_meta_update', $this->data, $post_id, $post);
+        do_action('cpm_before_meta_update', $this->metaData, $post_id, $post, $this->metaContext);
 
-        update_post_meta($post_id, $this->metaField, $this->data);
+        // This will save array to a single field `metaField`
+        update_post_meta($post_id, $this->metaField, $this->metaData);
 
-        do_action('cpm_after_meta_update', $this->data, $post_id, $post);
+        do_action('cpm_after_meta_update', $this->metaData, $post_id, $post, $this->metaContext);
     }
 
-    protected function form(?array $context = []): Form
+    public function getFormContext(): ?Form
     {
-        return $this->settings->form($context);
+        return $this->formContext;
+    }
+
+    protected function getPostFieldsData(): array
+    {
+        $fields = $this->formContext->getFields();
+
+        if ( ! \is_array($fields)) {
+            throw new \InvalidArgumentException('Fields must be an array.');
+        }
+
+        $data = [];
+        foreach ($fields as $key => $field) {
+            if ( ! isset($field['field'], $field['id'])) {
+                throw new \UnexpectedValueException("Each field must have 'field' and 'id' keys.");
+            }
+
+            // Determine the field key
+            $fieldKey = ('textarea' === $field['field'])
+                ? $field['id'] . '_textarea'
+                : $field['id'];
+
+            // Retrieve the value from $_POST
+            $fieldValue = $_POST[$fieldKey] ?? null;
+
+            // Apply custom filter, or default to sanitize_text_field
+            if (isset($field['filter']) && \is_callable($field['filter'])) {
+                $data[$fieldKey] = $field['filter']($fieldValue);
+            } else {
+                $data[$fieldKey] = sanitize_text_field($fieldValue);
+            }
+        }
+
+        return $data;
+    }
+
+    protected function form(): Form
+    {
+        return $this->settings->getForm();
     }
 
     /**
@@ -221,15 +279,15 @@ class MetaBox
     protected function tableCss(): void
     {
         ?><style media="all">
-			#cpm-post-meta-form table {
-				border-collapse: collapse;
-				width: 100%;
-			}
-			#cpm-post-meta-form th, td {
-				text-align: left;
-				padding: 12px;
-			}
-		</style>
+            #cpm-post-meta-form table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+            #cpm-post-meta-form th, td {
+                text-align: left;
+                padding: 12px;
+            }
+        </style>
         <?php
     }
 
@@ -237,23 +295,23 @@ class MetaBox
     {
         ?>
         <style media="all">
- 		   #cpm-post-meta-form table {
- 			   border-collapse: collapse;
- 			   width: 100%;
- 		   }
- 		   #cpm-post-meta-form th, td {
- 			   text-align: left;
- 			   padding: 12px;
- 		   }
- 		   #cpm-post-meta-form tbody tr:nth-child(even) {
- 			   background: #f6f7f7;
- 		   }
- 		   #cpm-post-meta-form tbody tr:nth-child(even) {
- 			   border-top: solid thin #eaeaea;
- 			   border-bottom: solid thin #eaeaea;
- 		   }
- 	   </style>
-		<?php
+           #cpm-post-meta-form table {
+               border-collapse: collapse;
+               width: 100%;
+           }
+           #cpm-post-meta-form th, td {
+               text-align: left;
+               padding: 12px;
+           }
+           #cpm-post-meta-form tbody tr:nth-child(even) {
+               background: #f6f7f7;
+           }
+           #cpm-post-meta-form tbody tr:nth-child(even) {
+               border-top: solid thin #eaeaea;
+               border-bottom: solid thin #eaeaea;
+           }
+       </style>
+        <?php
     }
 
     /**

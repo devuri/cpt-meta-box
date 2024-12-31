@@ -12,6 +12,7 @@
 namespace Urisoft\PostMeta\Interfaces;
 
 use Urisoft\PostMeta\Form\Form;
+use Urisoft\PostMeta\MetaBox;
 use WP_Post;
 
 interface SettingsInterface
@@ -19,7 +20,11 @@ interface SettingsInterface
     /**
      * @return Form
      */
-    public static function form(?array $context = []): Form;
+    public function withContext(MetaBox $metaBox): Form;
+
+    public function init(): self;
+
+    public function getForm(): Form;
 
     /**
      * Set up the settings and metadata for a specific post.
@@ -45,8 +50,6 @@ interface SettingsInterface
 
     /**
      * Settings data.
-     *
-     * @param array $postData
      */
-    public function data(array $postData);
+    public function data();
 }

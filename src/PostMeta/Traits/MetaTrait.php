@@ -119,20 +119,4 @@ trait MetaTrait
 
         return '';
     }
-
-    /**
-     * Use to get meta data.
-     *
-     * @param string $key the meta key.
-     *
-     * @return string
-     */
-    public function getMeta(string $key): string
-    {
-        if (isset($this->meta_data[$key])) {
-            return $this->meta_data[$key];
-        }
-
-        return '';
-    }
 }
