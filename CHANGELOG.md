@@ -1,5 +1,33 @@
 # Changelog
 
+## [0.5.0](https://github.com/devuri/cpt-meta-box/compare/v0.4.2...v0.5.0) (2024-12-31)
+
+
+### ⚠ BREAKING CHANGES
+
+* post type support with form context and autosave data
+* refactored updates the metabox and settings class
+* new cpt-meta update
+
+### Features
+
+* adds post type support ([ccd2700](https://github.com/devuri/cpt-meta-box/commit/ccd2700fbd43872b789400607ea383f35146a2fe))
+* new cpt-meta update ([0cab02a](https://github.com/devuri/cpt-meta-box/commit/0cab02a54bdd82aa94e173a40f920698928d66cc))
+* new example plugin ([4bd7d5e](https://github.com/devuri/cpt-meta-box/commit/4bd7d5ed7c3c53c10496767656b7aad76c41db91))
+* post type support with form context and autosave data ([5a213cb](https://github.com/devuri/cpt-meta-box/commit/5a213cbff869bd05199faa4bb69fa4cca067a075))
+* refactored updates the metabox and settings class ([4b0b2cb](https://github.com/devuri/cpt-meta-box/commit/4b0b2cb96b75f258f6128caef7bcc6dd51372501))
+
+
+### Bug Fixes
+
+* use `save_post_$posttype` ([711e8a9](https://github.com/devuri/cpt-meta-box/commit/711e8a9b00bbb313ae94d8ada37b4557e59cbc18))
+
+
+### Miscellaneous Chores
+
+* build ([916acbd](https://github.com/devuri/cpt-meta-box/commit/916acbd348938420b1fafae16126397822f56c3c))
+* build ([3ba1299](https://github.com/devuri/cpt-meta-box/commit/3ba129947b51cb6b3f10379c252df88873bbbc69))
+
 ## [0.4.2](https://github.com/devuri/cpt-meta-box/compare/v0.4.1...v0.4.2) (2024-03-20)
 
 

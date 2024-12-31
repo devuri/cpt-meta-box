@@ -34,7 +34,7 @@
         "vimeo/psalm": "^4.24 || ^5.0"
     },
     "autoload": {
-		"files": [
+        "files": [
             "src/helpers.php"
         ],
         "psr-4": {
