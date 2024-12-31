@@ -19,6 +19,40 @@ require_once __DIR__ . '/vendor/autoload.php';
 ```
 
 
+##  Simplified Example
+Below is a snippet of how a baisc plugin might set everything up:
+
+```php
+/**
+ * Plugin Name: Vehicle Management
+ */
+
+use Urisoft\PostMeta\Settings;
+
+// Define settings fields
+class VehicleSettings extends Settings
+{
+    public function settings()
+    {
+        $this->input('Vehicle Name');
+        $this->textarea('Description');
+        $this->select('Type', [
+            'car'        => 'Car',
+            'truck'      => 'Truck',
+            'motorcycle' => 'Motorcycle',
+            'selected'   => $this->getMeta('type'),
+        ]);
+        $this->input('Top Speed (mph)', ['type' => 'number']);
+    }
+}
+
+// Create the meta box
+createMeta(new VehicleSettings('vehicle'), [
+    'name' => 'Vehicle Details',
+]);
+```
+
+> When you visit **Vehicles > Add New** in the admin area, you’ll see a “Vehicle Details” meta box. Any data entered into these fields will automatically save to the post’s metadata.
 
 ## Key Features
 
@@ -217,9 +251,14 @@ Common methods include `input`, `textarea`, `select`, `editor`, and more.
 
 
 
-## Simplified Example
+Below are two examples demonstrating how to use the `urisoft/postmeta` package in a plugin context. Both examples register a custom post type called “Vehicle” and create a meta box for managing vehicle data in the WordPress admin.
 
-Below is a concise snippet illustrating how a plugin might set everything up:
+---
+
+## Example 1: Step-by-Step Setup with PostType and MetaBox
+
+<details>
+  <summary>Click to expand code</summary>
 
 ```php
 /**
@@ -261,7 +300,51 @@ class VehicleSettings extends Settings
 ]))->register();
 ```
 
-When you visit the admin area and edit a “Vehicle” post, you’ll see a “Vehicle Details” meta box. The data automatically saves to post meta.
+</details>
+
+When you visit **Vehicles > Add New** in the admin area, you’ll see a “Vehicle Details” meta box. Any data entered into these fields will automatically save to the post’s metadata.
+
+
+## Example 2: Helper Function (`createMeta`)
+
+<details>
+  <summary>Click to expand code</summary>
+
+```php
+/**
+ * Plugin Name: Vehicle Management
+ */
+
+use Urisoft\PostMeta\Settings;
+
+// Define settings fields
+class VehicleSettings extends Settings
+{
+    public function settings()
+    {
+        $this->input('Vehicle Name');
+        $this->textarea('Description');
+        $this->select('Type', [
+            'car'        => 'Car',
+            'truck'      => 'Truck',
+            'motorcycle' => 'Motorcycle',
+            'selected'   => $this->getMeta('type'),
+        ]);
+        $this->input('Top Speed (mph)', ['type' => 'number']);
+    }
+}
+
+// Create the meta box
+createMeta(new VehicleSettings('vehicle'), [
+    'name' => 'Vehicle Details',
+]);
+```
+
+</details>
+
+> **Note**: The `createMeta` function will skip registering the “vehicle” post type if it already exists. If that’s the case, you only get the meta box for the existing post type.
+
+Both approaches result in a “Vehicle Details” meta box when editing the “Vehicle” custom post type in your WordPress admin. Choose whichever method best suits your workflow.
 
 
 
