@@ -23,11 +23,29 @@ require_once __DIR__ . '/vendor/autoload.php';
 Below is a snippet of how a baisc plugin might set everything up:
 
 ```php
+use Urisoft\PostMeta\Settings;
+
 /**
- * Plugin Name: Vehicle Management
+ * Plugin Name:       Vehicle Management
+ * Plugin URI:        https://example.com/plugins
+ * Description:       An example plugin using the `cpt-meta` library to manage vehicles in WordPress.
+ * Version:           1.0
+ * Requires at least: 4.0
+ * Requires PHP:      7.4
+ * Author:            Your Name
+ * Author URI:        https://example.com
+ * Text Domain:       wp-vehicle-management
+ * License:           GPLv2
+ * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  */
 
-use Urisoft\PostMeta\Settings;
+
+if ( ! \defined( 'ABSPATH' ) ) {
+    exit;
+}
+
+// Autoload `cpt-meta` library
+require_once plugin_dir_path( __FILE__ ) . 'vendor/autoload.php';
 
 // Define settings fields
 class VehicleSettings extends Settings
