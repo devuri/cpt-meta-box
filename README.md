@@ -1,4 +1,4 @@
-# cpt-meta Library
+# cpt-meta
 
 The **`cpt-meta`** library simplifies the creation, management, and rendering of custom post types, meta boxes, and fields in WordPress. Its modular design makes it easier to build structured content management solutions by providing intuitive APIs for defining and sanitizing metadata, registering post types, generating custom fields, and interacting with WordPress hooks and REST endpoints.
 
