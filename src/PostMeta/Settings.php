@@ -110,17 +110,19 @@ abstract class Settings implements SettingsInterface
     {
         $this->postObject = $postObject;
         $this->metaData = get_post_meta($postObject ? $postObject->ID : 0, $metaField, true) ?: [];
-
         $fields = $this->form->getFields();
-
-        if (empty($fields)) {
-            return $this->settings();
-        }
 
         // Process each field.
         foreach ($fields as $field) {
+            if ( ! $field['output']) {
+                continue;
+            }
             $fieldName = $field['name'];
             $value = $this->metaData[$fieldName] ?? null;
+            if ('thumbnail' === $field['field']) {
+                $id    = get_post_meta($this->postObject->ID, '_thumbnail_id', true);
+                $value = wp_get_attachment_url($id);
+            }
 
             // Replace placeholder in the output.
             $output = str_replace("{{value}}", $value, $field['output']);
@@ -133,13 +135,13 @@ abstract class Settings implements SettingsInterface
     /**
      * Define the settings for the metabox (to be implemented in subclasses).
      */
-    public function settings()
+    public function settings(): void
     {
         // echo $this->input('Vehicle Name', [
         //     'placeholder' => 'Enter the vehicle name',
         // ]);
 
-        return;
+
     }
 
     public function withContext(MetaBox $metaBox): Form
