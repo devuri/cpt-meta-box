@@ -855,14 +855,15 @@ class Form
      */
     public function thumbnail(): ?string
     {
-        if ( ! isset($this->postObject->ID)) {
-            return null;
-        }
-        if ( ! has_post_thumbnail($this->postObject->ID)) {
-            return null;
-        }
-        $id    = get_post_meta($this->postObject->ID, '_thumbnail_id', true);
-        $image = '<img width="400" src="' . wp_get_attachment_url($id) . '" loading="lazy">';
+        $image = '<img width="400" src="{{value}}" loading="lazy">';
+
+        $this->addField(
+            [
+                'id' => 'thumbnail',
+                'field' => 'thumbnail',
+                'output' => $this->info('', $image, '', true),
+            ]
+        );
 
         return $this->info('', $image, '', true);
     }
@@ -1136,31 +1137,72 @@ class Form
         return hash('fnv1a64', serialize($inputParams));
     }
 
-    /**
-     * Registers a new input field with unique parameters.
-     *
-     * @param array $inputParams The parameters for the input field, including:
-     *                           'id'   => The unique identifier for the field.
-     *                           'uuid' => A generated unique hash for the field (added automatically).
-     *
-     * @throws \ErrorException If the field ID is already registered.
-     *
-     * @return void
-     */
-    protected function addField(array $inputParams): void
-    {
-        $inputID = $inputParams['id'];
-
-        if (\array_key_exists($inputID, $this->fields)) {
-            trigger_error("$inputID already registered");
-
-            return;
-        }
-
-        $inputParams['uuid'] = self::hashId($inputParams);
-
-        $this->fields[$inputID] = $inputParams;
+/**
+ * Registers a new input field with a unique identifier.
+ *
+ * If the provided 'id' already exists, an integer suffix will be appended until a unique ID is found.
+ * A 'uuid' key will also be generated automatically using the static hashId() method.
+ *
+ * @param array $fieldParams {
+ *     An associative array of field parameters. Required keys:
+ *       @type string 'id'    The unique identifier for the field (a fallback mechanism will append a
+ *                            numeric suffix if there's a conflict).
+ *       @type string 'field' The field type or name.
+ *
+ *     Optional keys:
+ *       @type array  'params'   Additional parameters for the field (default: []).
+ *       @type string 'title'    A display title for the field (default: empty string).
+ *       @type string 'dashicon' Dashicon class name (default: null).
+ *       @type string 'value'    Default field value (default: "{{value}}").
+ *       @type string 'output'   A custom output directive (default: null).
+ * }
+ *
+ * @throws \UnexpectedValueException If either 'field' or 'id' is not provided in the $fieldParams.
+ *
+ * @return void
+ */
+protected function addField(array $fieldParams): void
+{
+    if (!isset($fieldParams['field'], $fieldParams['id'])) {
+        throw new \UnexpectedValueException("Each field must have 'field' and 'id' keys.");
     }
+
+    // Start with the user-provided ID.
+    $inputID = $fieldParams['id'];
+    $i = 0;
+
+    // If there's a conflict, keep appending a numeric suffix until we find a free key.
+    while (\array_key_exists($inputID, $this->fields)) {
+        $inputID = (string) $fieldParams['id'] . $i++;
+    }
+
+    $inputParams = \array_merge(
+        [
+            'id'       => $inputID,
+            'name'     => $inputID . '_field',
+            'params'   => [],
+            'field'    => null,
+            'title'    => '',
+            'dashicon' => null,
+            'value'    => "{{value}}",
+            'output'   => null,
+        ],
+        $fieldParams
+    );
+
+    // Ensure the final ID reflects the unique version (in case suffix was appended).
+    $inputParams['id'] = $inputID;
+    $inputParams['uuid'] = self::hashId($inputParams);
+
+    // Double-check we haven't inadvertently created a duplicate after the merge.
+    if (\array_key_exists($inputID, $this->fields)) {
+        trigger_error("$inputID is already registered.");
+        return;
+    }
+
+    $this->fields[$inputID] = $inputParams;
+}
+
 
     /**
      * Retrieves a parameter value by its key from the provided array.
