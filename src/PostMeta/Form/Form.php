@@ -798,7 +798,7 @@ class Form
      *
      * @see https://codepen.io/devuri/pen/JjmYYjR
      */
-    public function imageGrid(array $images = [], array $element = []): ?string
+    public function imageGrid(array $images, array $element = []): ?string
     {
         if (empty($images)) {
             return null;
@@ -815,16 +815,16 @@ class Form
 
         $imagelist = '';
         foreach ($images as $key => $img) {
-            $imagelist .= $this->img($img, $elem['img_class']);
+            $imagelist .= $this->img($img, $elem['img_class'], false);
         }
 
-        return \sprintf(
+        $imageGridOutput = \sprintf(
             '<tr><!-- grid element %s -->
                 <th></th>
                     <td>
                         <div id="%s">%s</div>
                         <small style="color:#8c8f94;">double click on any item to delete</small>
-                        <input type="hidden" name="%s" id="%s">
+                        <input type="hidden" value="{{value}}" name="%s" id="%s">
                     </td>
             </tr>',
             $elem['div_id'],
@@ -833,19 +833,31 @@ class Form
             $elem['input_id'],
             $elem['input_id'],
         );
+
+
+        // Save field in inputs array
+        $this->addField([
+            'id' => $elem['input_id'],
+            'name' => $elem['input_id'],
+            'attachment' => $images,
+            'field' => 'image-grid',
+            'output' => $imageGridOutput,
+        ]);
+
+        return $imageGridOutput;
     }
 
     /**
      * Generates an HTML image tag using the provided item ID and class.
      *
-     * @param int    $itm_id    The ID of the image attachment.
-     * @param string $itm_class The CSS class to apply to the image element.
+     * @param int    $imgId    The ID of the image attachment.
+     * @param string $imgClass The CSS class to apply to the image element.
      *
      * @return string The generated HTML <img> tag.
      */
-    public function image($itm_id, string $itm_class): string
+    public function image($imgId, string $imgClass = '-image'): string
     {
-        return $this->img($itm_id, $itm_class);
+        return $this->img($imgId, $imgClass);
     }
 
     /**
@@ -1137,71 +1149,73 @@ class Form
         return hash('fnv1a64', serialize($inputParams));
     }
 
-/**
- * Registers a new input field with a unique identifier.
- *
- * If the provided 'id' already exists, an integer suffix will be appended until a unique ID is found.
- * A 'uuid' key will also be generated automatically using the static hashId() method.
- *
- * @param array $fieldParams {
- *     An associative array of field parameters. Required keys:
- *       @type string 'id'    The unique identifier for the field (a fallback mechanism will append a
- *                            numeric suffix if there's a conflict).
- *       @type string 'field' The field type or name.
- *
- *     Optional keys:
- *       @type array  'params'   Additional parameters for the field (default: []).
- *       @type string 'title'    A display title for the field (default: empty string).
- *       @type string 'dashicon' Dashicon class name (default: null).
- *       @type string 'value'    Default field value (default: "{{value}}").
- *       @type string 'output'   A custom output directive (default: null).
- * }
- *
- * @throws \UnexpectedValueException If either 'field' or 'id' is not provided in the $fieldParams.
- *
- * @return void
- */
-protected function addField(array $fieldParams): void
-{
-    if (!isset($fieldParams['field'], $fieldParams['id'])) {
-        throw new \UnexpectedValueException("Each field must have 'field' and 'id' keys.");
+    /**
+     * Registers a new input field with a unique identifier.
+     *
+     * If the provided 'id' already exists, an integer suffix will be appended until a unique ID is found.
+     * A 'uuid' key will also be generated automatically using the static hashId() method.
+     *
+     * @param array $fieldParams {
+     *                           An associative array of field parameters. Required keys:
+     *
+     * @var string 'id'    The unique identifier for the field (a fallback mechanism will append a
+     *             numeric suffix if there's a conflict).
+     * @var string 'field' The field type or name.
+     *
+     *     Optional keys:
+     * @var array  'params'   Additional parameters for the field (default: []).
+     * @var string 'title'    A display title for the field (default: empty string).
+     * @var string 'dashicon' Dashicon class name (default: null).
+     * @var string 'value'    Default field value (default: "{{value}}").
+     * @var string 'output'   A custom output directive (default: null).
+     *             }
+     *
+     * @throws \UnexpectedValueException If either 'field' or 'id' is not provided in the $fieldParams.
+     *
+     * @return void
+     */
+    protected function addField(array $fieldParams): void
+    {
+        if ( ! isset($fieldParams['field'], $fieldParams['id'])) {
+            throw new \UnexpectedValueException("Each field must have 'field' and 'id' keys.");
+        }
+
+        // Start with the user-provided ID.
+        $inputID = $fieldParams['id'];
+        $i = 0;
+
+        // If there's a conflict, keep appending a numeric suffix until we find a free key.
+        while (\array_key_exists($inputID, $this->fields)) {
+            $inputID = (string) $fieldParams['id'] . $i++;
+        }
+
+        $inputParams = array_merge(
+            [
+                'id'       => $inputID,
+                'name'     => $inputID . '_field',
+                'params'   => [],
+                'field'    => null,
+                'title'    => '',
+                'dashicon' => null,
+                'value'    => "{{value}}",
+                'output'   => null,
+            ],
+            $fieldParams
+        );
+
+        // Ensure the final ID reflects the unique version (in case suffix was appended).
+        $inputParams['id'] = $inputID;
+        $inputParams['uuid'] = self::hashId($inputParams);
+
+        // Double-check we haven't inadvertently created a duplicate after the merge.
+        if (\array_key_exists($inputID, $this->fields)) {
+            trigger_error("$inputID is already registered.");
+
+            return;
+        }
+
+        $this->fields[$inputID] = $inputParams;
     }
-
-    // Start with the user-provided ID.
-    $inputID = $fieldParams['id'];
-    $i = 0;
-
-    // If there's a conflict, keep appending a numeric suffix until we find a free key.
-    while (\array_key_exists($inputID, $this->fields)) {
-        $inputID = (string) $fieldParams['id'] . $i++;
-    }
-
-    $inputParams = \array_merge(
-        [
-            'id'       => $inputID,
-            'name'     => $inputID . '_field',
-            'params'   => [],
-            'field'    => null,
-            'title'    => '',
-            'dashicon' => null,
-            'value'    => "{{value}}",
-            'output'   => null,
-        ],
-        $fieldParams
-    );
-
-    // Ensure the final ID reflects the unique version (in case suffix was appended).
-    $inputParams['id'] = $inputID;
-    $inputParams['uuid'] = self::hashId($inputParams);
-
-    // Double-check we haven't inadvertently created a duplicate after the merge.
-    if (\array_key_exists($inputID, $this->fields)) {
-        trigger_error("$inputID is already registered.");
-        return;
-    }
-
-    $this->fields[$inputID] = $inputParams;
-}
 
 
     /**
@@ -1238,19 +1252,30 @@ protected function addField(array $fieldParams): void
     /**
      * Generates an HTML image tag with specified attributes.
      *
-     * @param int    $itm_id    The ID of the image attachment.
-     * @param string $itm_class The CSS class to apply to the image element.
+     * @param int    $imgId    The ID of the image attachment.
+     * @param string $imgClass The CSS class to apply to the image element.
      *
      * @return string The generated HTML <img> tag.
      */
-    protected function img($itm_id, string $itm_class): string
+    protected function img($imgId, string $imgClass = '-image-field', bool $display = true): string
     {
-        return \sprintf(
+        $itemClass = (string) $imgId . $imgClass;
+        $imageOutput = \sprintf(
             '<img class="%s" id="%s" style="padding-right: 4px; cursor: move;" width="190" src="%s">',
-            $itm_class,
-            $itm_id,
-            wp_get_attachment_url($itm_id),
+            $itemClass,
+            $imgId,
+            wp_get_attachment_url($imgId),
         );
+
+        // Save field in inputs array
+        $this->addField([
+            'id' => $imgId . '_attachment',
+            'attachment' => $imgId,
+            'field' => 'image',
+            'output' => ($display) ? $this->info('', $imageOutput, '', true) : null,
+        ]);
+
+        return $imageOutput;
     }
 
     /**
