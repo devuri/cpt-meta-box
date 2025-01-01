@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.5.1](https://github.com/devuri/cpt-meta-box/compare/v0.5.0...v0.5.1) (2025-01-01)
+
+
+### Bug Fixes
+
+* add handling for `thumbnail` field ([0c160c4](https://github.com/devuri/cpt-meta-box/commit/0c160c4bb3caef18b8daa552d4ca2eaab17cd79b))
+* better `addField` for multiple field types of the same name ([c469ae7](https://github.com/devuri/cpt-meta-box/commit/c469ae7066819cbcf95169d37697b2933ce3b812))
+* image grid update ([46d2835](https://github.com/devuri/cpt-meta-box/commit/46d2835135e1ed0fd8855dc64309f56dcdf1b0ea))
+
 ## [0.5.0](https://github.com/devuri/cpt-meta-box/compare/v0.4.2...v0.5.0) (2024-12-31)
 
 
