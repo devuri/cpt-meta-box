@@ -113,14 +113,14 @@ abstract class Settings implements SettingsInterface
 
         $fields = $this->form->getFields();
 
-        if (empty($fields)) {
-            return $this->settings();
-        }
-
         // Process each field.
         foreach ($fields as $field) {
             $fieldName = $field['name'];
             $value = $this->metaData[$fieldName] ?? null;
+            if ('thumbnail' === $field['field']) {
+                $id    = get_post_meta($this->postObject->ID, '_thumbnail_id', true);
+                $value = wp_get_attachment_url($id);
+            }
 
             // Replace placeholder in the output.
             $output = str_replace("{{value}}", $value, $field['output']);
