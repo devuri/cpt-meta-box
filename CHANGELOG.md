@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.2](https://github.com/devuri/cpt-meta-box/compare/v0.5.1...v0.5.2) (2025-01-02)
+
+
+### Features
+
+* adds `MetaRegistry` ([03f9aae](https://github.com/devuri/cpt-meta-box/commit/03f9aaed72354137cd7e6418a37a5d631e54ed7f))
+
 ## [0.5.1](https://github.com/devuri/cpt-meta-box/compare/v0.5.0...v0.5.1) (2025-01-01)
 
 
