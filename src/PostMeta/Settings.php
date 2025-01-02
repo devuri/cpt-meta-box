@@ -137,11 +137,9 @@ abstract class Settings implements SettingsInterface
      */
     public function settings(): void
     {
-        // echo $this->input('Vehicle Name', [
+        // $this->input('Vehicle Name', [
         //     'placeholder' => 'Enter the vehicle name',
         // ]);
-
-
     }
 
     public function withContext(MetaBox $metaBox): Form
