@@ -23,6 +23,7 @@ class MetaBox
     protected ?string $groupKey;
     protected ?array $metaContext;
     protected ?Form $formContext;
+    protected ?MetaRegistry $metaRegistry;
 
     /**
      * Constructor to initialize MetaBox.
@@ -43,6 +44,14 @@ class MetaBox
         // $this->metaField = $this->metabox . '_cpm';
         $this->metaField = $this->metabox . $this->groupKey;
         $this->metaLabel = ucfirst(str_replace('-', ' ', $this->metabox));
+
+        // setup registry.
+        $this->metaRegistry = new MetaRegistry(
+            $this->metaId,
+            $this->metaLabel,
+            [$this, 'render'],
+            $this->postType,
+        );
 
         $this->metaContext = [
             'args' => $this->args,
@@ -65,7 +74,8 @@ class MetaBox
             $postType->register();
         }
 
-        add_action('add_meta_boxes', [$this, 'createMetaBox']);
+        // Registers the meta box.
+        add_action('add_meta_boxes', [$this->metaRegistry, 'registerMetaBox']);
 
         if ($withSavePost) {
             add_action('save_post_' . $this->postType, [$this, 'saveMeta']);
@@ -99,19 +109,6 @@ class MetaBox
     public function postTypeData(): ?WP_Post_Type
     {
         return get_post_type_object($this->postType);
-    }
-
-    /**
-     * Registers the meta box.
-     */
-    public function createMetaBox(): void
-    {
-        add_meta_box(
-            $this->metaId,
-            $this->metaLabel,
-            [$this, 'render'],
-            $this->postType
-        );
     }
 
     /**
