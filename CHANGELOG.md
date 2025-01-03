@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.5.3](https://github.com/devuri/cpt-meta-box/compare/v0.5.2...v0.5.3) (2025-01-03)
+
+
+### Features
+
+* adds Generate bypass view key for the specified post. ([ac00447](https://github.com/devuri/cpt-meta-box/commit/ac00447622ddafa5689ced28ce496145d2805cc1))
+
+
+### Bug Fixes
+
+* select field render output ([4b36f2a](https://github.com/devuri/cpt-meta-box/commit/4b36f2a498070e683f357014833e25d6e5ac0848))
+
+
+### Miscellaneous Chores
+
+* build ([698f568](https://github.com/devuri/cpt-meta-box/commit/698f568edbeed5df323179dee4798d31df53aebd))
+
 ## [0.5.2](https://github.com/devuri/cpt-meta-box/compare/v0.5.1...v0.5.2) (2025-01-02)
 
 
