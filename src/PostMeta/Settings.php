@@ -124,6 +124,14 @@ abstract class Settings implements SettingsInterface
                 $value = wp_get_attachment_url($id);
             }
 
+            if ('select' === $field['field']) {
+                if (empty($value)) {
+                    $value = 'Select an option';
+                } else {
+                    $value = ucfirst(str_replace("-", ' ', $value));
+                }
+            }
+
             // Replace placeholder in the output.
             $output = str_replace("{{value}}", $value, $field['output']);
             static::output($output);
