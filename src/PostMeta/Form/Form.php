@@ -408,10 +408,12 @@ class Form
     public function select(string $fieldTitle = 'name', array $options = [], array $args = []): string
     {
         $fieldTitle = strtolower($fieldTitle);
+        $fieldId = $this->sanitize($fieldTitle, true);
+        $fieldName = $this->sanitize($fieldTitle);
         $params = $this->getParams($args);
 
         // Set selected option
-        $selected = $this->selected($options);
+        $selected = $this->selected($options) ?? "{{value}}";
 
         if (\array_key_exists('selected', $options)) {
             unset($options['selected']);
@@ -419,39 +421,37 @@ class Form
 
         // Prepare JavaScript function
         $js_function = $params['js'];
-        $default_select = '<option selected="selected">Select an option</option>';
+        //$default_select = '<option selected="selected">Select an option</option>';
 
         // Build the select field using sprintf
-        $select = \sprintf(
+        $selectOutput = \sprintf(
             '<!-- select field %s -->
             <tr class="input-%s">
                 <th>
                     <label for="%s">%s</label>
                 </th>
                 <td>
-                    <select onchange="%s" name="%s" id="%s" class="uk-select">
-                        %s',
-            str_replace(' ', '-', $fieldTitle),
-            str_replace(' ', '-', $fieldTitle),
-            str_replace(' ', '_', $fieldTitle),
-            ucwords(str_replace('_', ' ', $fieldTitle)),
+                    <select onchange="%s" name="%s" id="%s" class="uk-select">',
+            $fieldId,
+            $fieldId,
+            $fieldName,
+            ucfirst($fieldTitle),
             $js_function,
-            strtolower(str_replace(' ', '_', $fieldTitle)),
-            strtolower(str_replace(' ', '_', $fieldTitle)),
-            $default_select
+            $fieldName,
+            $fieldName,
         );
 
-        // Add options to the select field
+        // Add options to the select field, Select an option
+        $selectOutput .= '<option selected="selected">'.$selected.'</option>';
         foreach ($options as $optkey => $optvalue) {
-            $select .= \sprintf(
-                '<option value="%s"%s>%s</option>',
+            $selectOutput .= \sprintf(
+                '<option value="%s">%s</option>',
                 $optkey,
-                $optkey == $selected ? ' selected="selected"' : '',
                 ucfirst($optvalue)
             );
         }
 
-        $select .= \sprintf(
+        $selectOutput .= \sprintf(
             '</select>
             <strong style="color: #696969;margin: 8px;border: solid thin #cdcdcd;padding: 6px 14px;border-radius: 4px;">%s</strong>
             <p class="description" id="%s-description">%s%s</p>
@@ -459,13 +459,23 @@ class Form
             </tr>
             <!-- select field %s -->',
             ucwords(str_replace('_', ' ', $selected)),
-            str_replace(' ', '-', $fieldTitle),
-            strtolower(str_replace('_', ' ', $fieldTitle)),
+            str_replace(' ', '-', $fieldId),
+            $fieldTitle,
             $this->isDescription($params['required'] ?? null),
-            $fieldTitle
+            $fieldId
         );
 
-        return $select;
+        $this->addField([
+            'id' => $fieldName,
+            'name' => $fieldName,
+            'params' => $params,
+            'field' => 'select',
+            'title' => $fieldTitle,
+            'dashicon' => null,
+            'output' => $selectOutput,
+        ]);
+
+        return $selectOutput;
     }
 
     /**
@@ -1457,12 +1467,16 @@ class Form
      *
      * @return string The value of the 'selected' key if it exists, otherwise an empty string.
      */
-    private static function selected(array $options): string
+    private static function selected(array $options): ?string
     {
         if (\array_key_exists('selected', $options)) {
-            return $options['selected'];
+            $selectedOption = $options['selected'];
         }
 
-        return '';
+        if (! empty($selectedOption)) {
+            return $selectedOption;
+        }
+
+        return null;
     }
 }
