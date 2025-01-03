@@ -24,6 +24,8 @@ class MetaBox
     protected ?array $metaContext;
     protected ?Form $formContext;
     protected ?MetaRegistry $metaRegistry;
+    protected ?string $beforeMetaUpdateHook;
+    protected ?string $afterMetaUpdateHook;
 
     /**
      * Constructor to initialize MetaBox.
@@ -45,9 +47,9 @@ class MetaBox
         $this->metaField = $this->metabox . $this->groupKey;
         $this->metaLabel = ucfirst(str_replace('-', ' ', $this->metabox));
 
-		// hooks and filters
-		$this->beforeMetaUpdateHook = "cpm_before_meta_update_{$this->postType}";
-		$this->afterMetaUpdateHook = "cpm_after_meta_update_{$this->postType}";
+        // hooks and filters
+        $this->beforeMetaUpdateHook = "cpm_before_meta_update_{$this->postType}";
+        $this->afterMetaUpdateHook = "cpm_after_meta_update_{$this->postType}";
 
         // setup registry.
         $this->metaRegistry = new MetaRegistry(
@@ -181,30 +183,30 @@ class MetaBox
 
         do_action($this->afterMetaUpdateHook, $this->metaData, $post_id, $post, $this->metaContext);
 
-		/**
-		 * Generates a bypass view key for the specified post.
-		 *
-		 * This method is used to generate a bypass view key that can be shared with users to allow them to
-		 * view the post item without making it publicly accessible. The generated key is stored as a
-		 * WordPress transient, which is temporary and expires after a predefined time (1 day by default).
-		 *
-		 * The bypass view key can be included as a query parameter in the link sent to users, enabling
-		 * preview access. This functionality is particularly useful in multi-review workflows where
-		 * multiple stakeholders need to review the content before it is published. Stakeholders can use
-		 * the bypass view link to review the content without making it publicly visible.
-		 *
-		 * Note: This requires the `'viewkey'` parameter to be set to `true` during class initialization.
-		 *
-		 * Example of a transient key that might be created:
-		 * - `cpm_vehicle_viewkey_123` (for a "vehicle" post with ID 123)
-		 *
-		 * The transient contains a randomly generated hexadecimal string and expires after 1 day.
-		 *
-		 * @param int $post_id The ID of the post for which the bypass view key is being generated.
-		 *
-		 * @return void
-		 */
-		$this->setBypassViewKey($post_id);
+        /*
+         * Generates a bypass view key for the specified post.
+         *
+         * This method is used to generate a bypass view key that can be shared with users to allow them to
+         * view the post item without making it publicly accessible. The generated key is stored as a
+         * WordPress transient, which is temporary and expires after a predefined time (1 day by default).
+         *
+         * The bypass view key can be included as a query parameter in the link sent to users, enabling
+         * preview access. This functionality is particularly useful in multi-review workflows where
+         * multiple stakeholders need to review the content before it is published. Stakeholders can use
+         * the bypass view link to review the content without making it publicly visible.
+         *
+         * Note: This requires the `'viewkey'` parameter to be set to `true` during class initialization.
+         *
+         * Example of a transient key that might be created:
+         * - `cpm_vehicle_viewkey_123` (for a "vehicle" post with ID 123)
+         *
+         * The transient contains a randomly generated hexadecimal string and expires after 1 day.
+         *
+         * @param int $post_id The ID of the post for which the bypass view key is being generated.
+         *
+         * @return void
+         */
+        $this->setBypassViewKey($post_id);
     }
 
     public function getFormContext(): ?Form
@@ -212,33 +214,28 @@ class MetaBox
         return $this->formContext;
     }
 
-	/**
-	 * Sets a bypass view key for a specific post if none exists.
-	 *
-	 * This method generates a new bypass view key for the given post if it does not already exist.
-	 * The key is stored as a transient with a lifespan of one day. The view key is only set if
-	 * the required 'viewkey' argument is available.
-	 *
-	 * @param int $postId The ID of the post for which the bypass key is being set.
-	 * @param int $bytes  Optional. The length of the token to generate, in bytes. Default is 32.
-	 *
-	 * @return void
-	 */
-	protected function setBypassViewKey( $postId, int $bytes = 32 ): void
-	{
-	    if ( ! $this->arg( 'viewkey' ) ) {
-	        return;
-	    }
-	    $bypassKeyTransient = "cpm_{$this->postType}_viewkey_{$postId}";
-	    if ( ! get_transient( $bypassKeyTransient ) ) {
-	        set_transient( $bypassKeyTransient, bin2hex( random_bytes( $bytes ) ), DAY_IN_SECONDS );
-	    }
-	}
-
-	private function arg(string $argKey)
-	{
-		return $this->args[$argKey] ?? null;
-	}
+    /**
+     * Sets a bypass view key for a specific post if none exists.
+     *
+     * This method generates a new bypass view key for the given post if it does not already exist.
+     * The key is stored as a transient with a lifespan of one day. The view key is only set if
+     * the required 'viewkey' argument is available.
+     *
+     * @param int $postId The ID of the post for which the bypass key is being set.
+     * @param int $bytes  Optional. The length of the token to generate, in bytes. Default is 32.
+     *
+     * @return void
+     */
+    protected function setBypassViewKey($postId, int $bytes = 32): void
+    {
+        if ( ! $this->arg('viewkey')) {
+            return;
+        }
+        $bypassKeyTransient = "cpm_{$this->postType}_viewkey_{$postId}";
+        if ( ! get_transient($bypassKeyTransient)) {
+            set_transient($bypassKeyTransient, bin2hex(random_bytes($bytes)), DAY_IN_SECONDS);
+        }
+    }
 
     protected function getPostFieldsData(): array
     {
@@ -306,12 +303,12 @@ class MetaBox
         }
 
         return array_merge(
-			[
-				'zebra' => true,
-				'viewkey' => false,
-			],
-			$args
-		);
+            [
+                'zebra' => true,
+                'viewkey' => false,
+            ],
+            $args
+        );
     }
 
     /**
@@ -372,6 +369,11 @@ class MetaBox
            }
        </style>
         <?php
+    }
+
+    private function arg(string $argKey)
+    {
+        return $this->args[$argKey] ?? null;
     }
 
     /**

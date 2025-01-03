@@ -421,7 +421,7 @@ class Form
 
         // Prepare JavaScript function
         $js_function = $params['js'];
-        //$default_select = '<option selected="selected">Select an option</option>';
+        // $default_select = '<option selected="selected">Select an option</option>';
 
         // Build the select field using sprintf
         $selectOutput = \sprintf(
@@ -442,7 +442,7 @@ class Form
         );
 
         // Add options to the select field, Select an option
-        $selectOutput .= '<option selected="selected">'.$selected.'</option>';
+        $selectOutput .= '<option selected="selected">' . $selected . '</option>';
         foreach ($options as $optkey => $optvalue) {
             $selectOutput .= \sprintf(
                 '<option value="%s">%s</option>',
@@ -1473,7 +1473,7 @@ class Form
             $selectedOption = $options['selected'];
         }
 
-        if (! empty($selectedOption)) {
+        if ( ! empty($selectedOption)) {
             return $selectedOption;
         }
 

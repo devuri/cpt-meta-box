@@ -125,7 +125,6 @@ abstract class Settings implements SettingsInterface
             }
 
             if ('select' === $field['field']) {
-
                 if (empty($value)) {
                     $value = 'Select an option';
                 } else {
