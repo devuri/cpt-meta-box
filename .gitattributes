@@ -23,5 +23,7 @@ package-lock.json              export-ignore
 package.json                   export-ignore
 phpstan.neon                   export-ignore
 sample-wp-config.php           export-ignore
+example-plugin-one.php         export-ignore
+example-plugin-two.php         export-ignore
 release-please-config.json     export-ignore
 /.release-please-manifest.json export-ignore
