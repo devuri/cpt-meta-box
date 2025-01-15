@@ -71,6 +71,7 @@ createMeta(new VehicleSettings('vehicle'), [
 ```
 
 > When you visit **Vehicles > Add New** in the admin area, you’ll see a “Vehicle Details” meta box. Any data entered into these fields will automatically save to the post’s metadata.
+> check out the full sample plugin code here: https://github.com/devuri/wp-vehicle-management
 
 ## Key Features
 
